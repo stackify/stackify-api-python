@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 import re
 import ast
 
@@ -18,6 +18,8 @@ setup(
     license=open('LICENSE.txt').readline(),
     description='Stackify API for Python',
     long_description=open('README.md').read(),
-    install_requires=[]
+    install_requires=[
+        'retrying>=1.2.3'
+    ]
 )
 
