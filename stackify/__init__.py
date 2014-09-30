@@ -14,6 +14,8 @@ import logging
 
 logging.basicConfig()
 
+internal_log = logging.getLogger(__name__)
+
 from stackify.application import ApiConfiguration
 from stackify.http import HTTPClient
 
