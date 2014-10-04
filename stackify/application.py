@@ -1,13 +1,8 @@
 import socket
 import os
-import json
 
 from stackify import API_URL
-
-
-class JSONObject(object):
-    def toJSON(self):
-        return json.dumps(self, default=lambda x: x.__dict__)
+from stackify.formats import JSONObject
 
 
 class EnvironmentDetail(JSONObject):

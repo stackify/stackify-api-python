@@ -1,4 +1,4 @@
-from stackify.application import JSONObject
+from stackify.formats import JSONObject
 
 
 class ErrorItem(JSONObject):

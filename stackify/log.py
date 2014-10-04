@@ -1,22 +1,11 @@
 import time
 import threading
-import logging
 import json
 
-from stackify.application import JSONObject
+from stackify.formats import JSONObject
 
+from stackify import MAX_BATCH, LOGGING_LEVELS
 
-MAX_BATCH = 100
-
-
-LOGGING_LEVELS = {
-    logging.CRITICAL: 'CRITICAL',
-    logging.ERROR: 'ERROR',
-    logging.WARNING: 'WARNING',
-    logging.INFO: 'INFO',
-    logging.DEBUG: 'DEBUG',
-    logging.NOTSET: 'NOTSET'
-}
 
 
 class LogMsg(JSONObject):
