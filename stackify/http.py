@@ -6,7 +6,22 @@ import gzip
 try:
     from cStringIO import StringIO
 except:
-    from StringIO import StringIO
+    try:
+        from StringIO import StringIO
+    except:
+        pass # python 3, we use a new function in gzip
+
+
+def gzip_compress(data):
+    if hasattr(gzip, 'compress'):
+        return gzip.compress(bytes(data, 'utf-8')) # python 3
+    else:
+        s = StringIO()
+        g = gzip.GzipFile(fileobj=s, mode='w')
+        g.write(data)
+        g.close()
+        return s.getvalue()
+
 
 from stackify.application import EnvironmentDetail
 from stackify import READ_TIMEOUT
@@ -34,19 +49,13 @@ class HTTPClient:
             'X-Stackify-PV': 'V1',
         }
 
-
         try:
             payload_data = json_object.toJSON()
             internal_log.debug('POST data: {0}'.format(payload_data))
 
             if use_gzip:
                 headers['Content-Encoding'] = 'gzip'
-                # compress payload with gzip
-                s = StringIO()
-                g = gzip.GzipFile(fileobj=s, mode='w')
-                g.write(payload_data)
-                g.close()
-                payload_data = s.getvalue()
+                payload_data = gzip_compress(payload_data)
 
             response = requests.post(request_url,
                         data=payload_data, headers=headers,

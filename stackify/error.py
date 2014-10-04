@@ -1,4 +1,5 @@
 import traceback
+import time
 import sys
 
 from stackify.formats import JSONObject
@@ -8,15 +9,19 @@ class ErrorItem(JSONObject):
     def __init__(self):
         self.Message = None # exception message
         self.ErrorType = None # exception class name
-        self.ErrorTypeCode = None # ?
+        self.ErrorTypeCode = None
         self.Data = None # custom data
         self.SourceMethod = None
         self.StackTrace = [] # array of TraceFrames
         self.InnerError = None # cause?
 
-    def load_stack(self, tb):
+    def load_stack(self):
+        type_, value, tb = sys.exc_info()
         stacks = traceback.extract_tb(tb)
-        for filename, lineno, parent, method in stacks:
+        self.ErrorType = type_.__name__
+        self.Message = str(value)
+        self.SourceMethod = stacks[-1][2]
+        for filename, lineno, method, text in reversed(stacks):
             self.StackTrace.append(TraceFrame(filename, lineno, method))
 
 
@@ -49,7 +54,7 @@ class WebRequestDetail(JSONObject):
 class StackifyError(JSONObject):
     def __init__(self):
         self.EnvironmentDetail = None # environment detail object
-        self.OccurredEpochMillis = None
+        self.OccurredEpochMillis = int(time.time() * 1000)
         self.Error = None # ErrorItem object
         self.WebRequestDetail = None # WebRequestDetail object
         self.CustomerName = None
@@ -57,6 +62,5 @@ class StackifyError(JSONObject):
 
     def load_exception(self):
         self.Error = ErrorItem()
-        type_, value, tb = sys.exc_info()
-        self.Error.load_stack(tb)
+        self.Error.load_stack()
 
