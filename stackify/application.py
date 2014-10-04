@@ -1,10 +1,16 @@
 import socket
 import os
+import json
 
 from stackify import API_URL
 
 
-class EnvironmentDetail:
+class JSONObject(object):
+    def toJSON(self):
+        return json.dumps(self, default=lambda x: x.__dict__)
+
+
+class EnvironmentDetail(JSONObject):
     def __init__(self, api_config):
         self.deviceName = socket.gethostname()
         self.appLocation = os.getcwd()

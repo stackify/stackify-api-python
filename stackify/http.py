@@ -1,53 +1,62 @@
-import json
-import urllib2
+import requests
 import retrying
 import logging
+import zlib
 
 from stackify.application import EnvironmentDetail
 from stackify import READ_TIMEOUT
-
-
-internal_log = logging.getLogger(__name__)
 
 
 class HTTPClient:
     def __init__(self, api_config):
         self.api_config = api_config
         self.environment_detail = EnvironmentDetail(api_config)
-        self.identify_application()
+        self.app_name_id = None
+        self.app_env_id = None
+        self.device_id = None
+        self.device_app_id = None
+        self.device_alias = None
+        self.identified = False
 
-
-    def POST(self, url, payload):
+    def POST(self, url, json_object, gzip=False):
         request_url = self.api_config.api_url + url
-        request = urllib2.Request(request_url)
+        internal_log = logging.getLogger(__name__)
         internal_log.debug('Request URL: {0}'.format(request_url))
 
-        request.add_header('Content-Type', 'application/json')
-        request.add_header('X-Stackify-Key', self.api_config.api_key)
-        request.add_header('X-Stackify-PV', 'V1')
+        headers = {
+            'Content-Type': 'application/json',
+            'X-Stackify-Key': self.api_config.api_key,
+            'X-Stackify-PV': 'V1',
+        }
+
 
         try:
-            response = urllib2.urlopen(request, json.dumps(payload), timeout=READ_TIMEOUT)
-            body = response.read()
-            internal_log.debug('Response: {0}'.format(body))
-            json.loads('junk')
-            return json.loads(body)
-        except urllib2.HTTPError as e:
-            internal_log.exception('HTTP response: {0}'.format(e.code))
-            raise
-        except urllib2.URLError as e:
-            internal_log.exception('URL exception: {0}'.format(e.reason))
+            payload_data = json_object.toJSON()
+
+            if gzip:
+                headers['Content-Encoding'] = 'gzip'
+                payload_data = zlib.compress(payload_data)
+
+            response = requests.post(request_url,
+                        data=payload_data, headers=headers,
+                        timeout=READ_TIMEOUT)
+            internal_log.debug('Response: {0}'.format(response.text))
+            return response.json()
+        except requests.exceptions.RequestException:
+            interal_log.exception('HTTP exception:')
             raise
         except ValueError as e:
             # could not read json response
             internal_log.exception('Cannot decode JSON response')
             raise
 
-    @retrying.retry(wait_exponential_multiplier=1000, stop_max_delay=10000)
+    #@retrying.retry(wait_exponential_multiplier=1000, stop_max_delay=10000)
     def identify_application(self):
-        result = self.POST('/Metrics/IdentifyApp', self.environment_detail.__dict__)
+        result = self.POST('/Metrics/IdentifyApp', self.environment_detail)
         self.app_name_id = result.get('AppNameID')
         self.app_env_id = result.get('AppEnvID')
         self.device_id = result.get('DeviceID')
         self.device_app_id = result.get('DeviceAppID')
+        self.device_alias = result.get('DeviceAlias')
+        self.identified = True
 

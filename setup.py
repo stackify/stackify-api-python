@@ -19,7 +19,8 @@ setup(
     description='Stackify API for Python',
     long_description=open('README.md').read(),
     install_requires=[
-        'retrying>=1.2.3'
+        'retrying>=1.2.3',
+        'requests>=2.4.1'
     ]
 )
 
