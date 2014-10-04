@@ -1,7 +1,12 @@
 import requests
 import retrying
 import logging
-import zlib
+import gzip
+
+try:
+    from cStringIO import StringIO
+except:
+    from StringIO import StringIO
 
 from stackify.application import EnvironmentDetail
 from stackify import READ_TIMEOUT
@@ -18,7 +23,7 @@ class HTTPClient:
         self.device_alias = None
         self.identified = False
 
-    def POST(self, url, json_object, gzip=False):
+    def POST(self, url, json_object, use_gzip=False):
         request_url = self.api_config.api_url + url
         internal_log = logging.getLogger(__name__)
         internal_log.debug('Request URL: {0}'.format(request_url))
@@ -34,9 +39,14 @@ class HTTPClient:
             payload_data = json_object.toJSON()
             internal_log.debug('POST data: {0}'.format(payload_data))
 
-            if gzip:
+            if use_gzip:
                 headers['Content-Encoding'] = 'gzip'
-                payload_data = zlib.compress(payload_data)
+                # compress payload with gzip
+                s = StringIO()
+                g = gzip.GzipFile(fileobj=s, mode='w')
+                g.write(payload_data)
+                g.close()
+                payload_data = s.getvalue()
 
             response = requests.post(request_url,
                         data=payload_data, headers=headers,
