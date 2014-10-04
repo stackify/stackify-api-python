@@ -1,6 +1,7 @@
 import time
 import threading
 import logging
+import json
 
 from stackify.application import JSONObject
 
@@ -19,10 +20,10 @@ LOGGING_LEVELS = {
 
 
 class LogMsg(JSONObject):
-    def __init__(self):
-        self.Msg = None
-        self.data = None
-        self.Ex = None
+    def __init__(self, message, data=None):
+        self.Msg = message
+        self.data = json.dumps(data, default=lambda x: x.__dict__) if data else None
+        self.Ex = None # a StackifyError object
         self.Th = threading.current_thread().ident
         self.EpochMs = int(time.time() * 1000)
         self.Level = None
