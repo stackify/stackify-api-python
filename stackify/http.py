@@ -32,6 +32,7 @@ class HTTPClient:
 
         try:
             payload_data = json_object.toJSON()
+            internal_log.debug('POST data: {0}'.format(payload_data))
 
             if gzip:
                 headers['Content-Encoding'] = 'gzip'
