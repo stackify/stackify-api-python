@@ -38,14 +38,18 @@ from stackify.http import HTTPClient
 from stackify.handler import StackifyHandler
 
 
+# TODO
+# holds our listeners, since more than one handler can service
+# the same listener
+__listener_cache = {}
+
+
 def getLogger(name=None, **kwargs):
+    '''
+    Get a logger and attach a StackifyHandler if needed:w
+    '''
     if not name:
-        try:
-            frame = inspect.stack()[1]
-            module = inspect.getmodule(frame[0])
-            name = module.__name__
-        except IndexError:
-            name = 'stackify-python-unknown'
+        name = getCallerName(2)
 
     logger = logging.getLogger(name)
 
@@ -57,6 +61,35 @@ def getLogger(name=None, **kwargs):
         if logger.getEffectiveLevel() == logging.NOTSET:
             logger.setLevel(DEFAULT_LEVEL)
 
+        handler.listener.start()
+
     return logger
 
+def stopLogging(logger):
+    '''
+    Shut down the StackifyHandler on a given logger. This will block
+    and wait for the queue to finish uploading.
+    '''
+    for handler in getHandlers(logger):
+        handler.listener.stop()
+
+
+def getCallerName(levels=1):
+    '''
+    Gets the name of the module calling this function
+    '''
+    try:
+        frame = inspect.stack()[levels]
+        module = inspect.getmodule(frame[0])
+        name = module.__name__
+    except IndexError:
+        name = 'stackify-python-unknown'
+    return name
+
+
+def getHandlers(logger):
+    '''
+    Return the StackifyHandlers on a given logger
+    '''
+    return [isinstance(x, StackifyHandler) for x in logger.handlers]
 
