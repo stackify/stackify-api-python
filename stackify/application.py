@@ -39,3 +39,4 @@ def get_configuration(**kwargs):
             environment = arg_or_env('environment', kwargs),
             api_key = arg_or_env('api_key', kwargs),
             api_url = arg_or_env('api_url', kwargs))
+
