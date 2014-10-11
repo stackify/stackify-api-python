@@ -17,6 +17,10 @@
 
 import logging
 import threading
+try:
+    import Queue as queue
+except ImportError:
+    import queue
 
 
 class QueueHandler(logging.Handler):

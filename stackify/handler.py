@@ -12,12 +12,11 @@ try:
 except ImportError:
     import queue
 
-from stackify import QUEUE_SIZE, API_URL
-from stackify.log import LogMsg
+from stackify import QUEUE_SIZE, API_URL, MAX_BATCH
+from stackify.log import LogMsg, LogMsgGroup
 from stackify.error import ErrorItem
 from stackify.http import HTTPClient
-from stackify.application import ApiConfiguration
-
+from stackify.application import get_configuration
 
 
 class StackifyHandler(QueueHandler):
@@ -26,7 +25,7 @@ class StackifyHandler(QueueHandler):
     transmission to Stackify servers.
     '''
 
-    def __init__(self, queue_=None, listener=None **kwargs):
+    def __init__(self, queue_=None, listener=None, **kwargs):
         if queue_ is None:
             queue_ = queue.Queue(QUEUE_SIZE)
 
@@ -41,34 +40,13 @@ class StackifyHandler(QueueHandler):
         '''
         Put a new record on the queue. If it's full, evict an item.
         '''
+        logger = logging.getLogger(__name__)
         try:
             self.queue.put_nowait(record)
-            logger = logging.getLogger(__name__)
-            logger.debug('put record ' + record.toJSON())
         except queue.Full:
-            logger = logging.getLogger(__name__)
             logger.warn('StackifyHandler queue is full, evicting oldest record')
             self.queue.get_nowait()
             self.queue.put_nowait(record)
-
-    def prepare(self, record):
-        msg = LogMsg()
-        msg.from_record(record)
-
-        return msg
-
-
-def arg_or_env(name, args, default=None):
-    env_name = 'STACKIFY_{0}'.format(name.upper())
-    try:
-        return args.get(name, os.environ[env_name])
-    except KeyError:
-        if default:
-            return default
-        else:
-            raise NameError('You must specify the keyword argument {0} or environment variable {1}'.format(
-                name, env_name))
-
 
 
 class StackifyListener(QueueListener):
@@ -76,19 +54,42 @@ class StackifyListener(QueueListener):
     A listener to read queued log messages and send them to Stackify.
     '''
 
-    def __init__(self, queue_, config=None, **kwargs):
+    def __init__(self, queue_, max_batch=MAX_BATCH, config=None, **kwargs):
         super(StackifyListener, self).__init__(queue_)
 
         if config is None:
-            # config not specified, build one with kwargs or environment variables
-            config = ApiConfiguration(
-                application = arg_or_env('application', kwargs),
-                environment = arg_or_env('environment', kwargs),
-                api_key = arg_or_env('api_key', kwargs),
-                api_url = arg_or_env('api_url', kwargs, API_URL))
+            config = get_configuration(**kwargs)
 
+        self.max_batch = max_batch
+        self.messages = []
         self.http = HTTPClient(config)
 
     def handle(self, record):
+        logger = logging.getLogger(__name__)
 
+        if not self.http.identified:
+            logger.debug('Identifying application')
+            self.http.identify_application()
+
+        msg = LogMsg()
+        msg.from_record(record)
+        self.messages.append(msg)
+
+        if len(self.messages) >= self.max_batch:
+            self.send_group()
+
+    def send_group(self):
+        group = LogMsgGroup(self.messages)
+        self.http.POST('/Log/Save', group, True)
+        del self.messages[:]
+
+    def stop(self):
+        logger = logging.getLogger(__name__)
+        logger.debug('Shutting down listener')
+        super(StackifyListener, self).stop()
+
+        # send any remaining messages
+        if self.messages:
+            logger.debug('{0} messages left on shutdown, uploading'.format(len(self.messages)))
+            self.send_group()
 

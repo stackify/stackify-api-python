@@ -20,3 +20,22 @@ class ApiConfiguration:
         self.application = application
         self.environment = environment
 
+
+def arg_or_env(name, args, default=None):
+    env_name = 'STACKIFY_{0}'.format(name.upper())
+    try:
+        return args.get(name, os.environ[env_name])
+    except KeyError:
+        if default:
+            return default
+        else:
+            raise NameError('You must specify the keyword argument {0} or environment variable {1}'.format(
+                name, env_name))
+
+
+def get_configuration(**kwargs):
+        return ApiConfiguration(
+            application = arg_or_env('application', kwargs),
+            environment = arg_or_env('environment', kwargs),
+            api_key = arg_or_env('api_key', kwargs),
+            api_url = arg_or_env('api_url', kwargs))

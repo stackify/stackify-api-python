@@ -15,6 +15,7 @@ QUEUE_SIZE = 1000
 
 import logging
 import inspect
+import atexit
 
 DEFAULT_LEVEL = logging.ERROR
 
@@ -46,7 +47,7 @@ __listener_cache = {}
 
 def getLogger(name=None, **kwargs):
     '''
-    Get a logger and attach a StackifyHandler if needed:w
+    Get a logger and attach a StackifyHandler if needed.
     '''
     if not name:
         name = getCallerName(2)
@@ -54,9 +55,11 @@ def getLogger(name=None, **kwargs):
     logger = logging.getLogger(name)
 
     if not [isinstance(x, StackifyHandler) for x in logger.handlers]:
-        internal_log.debug('Creating handler for logger {0}'.format(name))
+        internal_log.debug('Creating handler for logger %s', name)
         handler = StackifyHandler(**kwargs)
         logger.addHandler(handler)
+
+        atexit.register(stopLogging, logger)
 
         if logger.getEffectiveLevel() == logging.NOTSET:
             logger.setLevel(DEFAULT_LEVEL)
@@ -70,6 +73,7 @@ def stopLogging(logger):
     Shut down the StackifyHandler on a given logger. This will block
     and wait for the queue to finish uploading.
     '''
+    internal_log.debug('Shutting down all handlers')
     for handler in getHandlers(logger):
         handler.listener.stop()
 
@@ -91,5 +95,5 @@ def getHandlers(logger):
     '''
     Return the StackifyHandlers on a given logger
     '''
-    return [isinstance(x, StackifyHandler) for x in logger.handlers]
+    return [x for x in logger.handlers if isinstance(x, StackifyHandler)]
 
