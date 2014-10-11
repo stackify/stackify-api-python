@@ -41,7 +41,7 @@ class HTTPClient:
     def POST(self, url, json_object, use_gzip=False):
         request_url = self.api_config.api_url + url
         internal_log = logging.getLogger(__name__)
-        internal_log.debug('Request URL: {0}'.format(request_url))
+        internal_log.debug('Request URL: %s', request_url)
 
         headers = {
             'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ class HTTPClient:
 
         try:
             payload_data = json_object.toJSON()
-            internal_log.debug('POST data: {0}'.format(payload_data))
+            internal_log.debug('POST data: %s', payload_data)
 
             if use_gzip:
                 headers['Content-Encoding'] = 'gzip'
@@ -60,7 +60,7 @@ class HTTPClient:
             response = requests.post(request_url,
                         data=payload_data, headers=headers,
                         timeout=READ_TIMEOUT)
-            internal_log.debug('Response: {0}'.format(response.text))
+            internal_log.debug('Response: %s', response.text)
             return response.json()
         except requests.exceptions.RequestException:
             interal_log.exception('HTTP exception:')
