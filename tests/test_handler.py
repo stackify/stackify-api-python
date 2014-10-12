@@ -11,9 +11,11 @@ try:
 except ImportError:
     import queue
 
-import stackify.handler
 from stackify.handler import StackifyHandler, StackifyListener
 from stackify.application import ApiConfiguration
+from stackify import internal_log
+
+import logging
 
 
 class TestHandler(unittest.TestCase):
@@ -25,11 +27,13 @@ class TestHandler(unittest.TestCase):
         '''The queue should evict when full'''
         q = queue.Queue(1)
         handler = StackifyHandler(queue_=q, listener=Mock())
+        internal_log.setLevel(logging.CRITICAL) # don't print warnings on overflow
         handler.enqueue('test1')
         handler.enqueue('test2')
         handler.enqueue('test3')
         self.assertEqual(q.qsize(), 1)
         self.assertEqual(q.get(), 'test3')
+
 
 class TestListener(unittest.TestCase):
     '''
@@ -44,7 +48,7 @@ class TestListener(unittest.TestCase):
             api_url = 'test_apiurl')
 
     @patch('stackify.handler.LogMsg')
-    @patch.object(StackifyListener, 'send_group')
+    @patch('stackify.handler.StackifyListener.send_group')
     @patch('stackify.http.HTTPClient.identify_application')
     def test_not_identified(self, ident, send_group, logmsg):
         '''The HTTPClient identifies automatically if needed'''
@@ -71,6 +75,20 @@ class TestListener(unittest.TestCase):
         listener.handle(4)
         self.assertEqual(post.call_count, 1)
         self.assertEqual(len(listener.messages), 1)
+
+    @patch('stackify.handler.LogMsg')
+    @patch('stackify.handler.StackifyListener.send_group')
+    def test_clear_queue_shutdown(self, send_group, logmsg):
+        '''The listener sends the leftover messages on the queue when shutting down'''
+        listener = StackifyListener(queue_=Mock(), max_batch=3, config=self.config)
+        listener.http.identified = True
+        listener._thread = Mock()
+
+        listener.handle(1)
+        listener.handle(2)
+        self.assertFalse(send_group.called)
+        listener.stop()
+        self.assertTrue(send_group.called)
 
 
 if __name__=='__main__':
