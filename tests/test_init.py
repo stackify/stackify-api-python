@@ -96,7 +96,7 @@ class TestInit(ClearEnvTest):
         logger = stackify.getLogger(config=self.config, auto_shutdown=False)
         self.loggers.append(logger)
         logger_two = stackify.getLogger(config=self.config, auto_shutdown=False)
-        self.assertEqual(id(logger_two), id(logger))
+        self.assertIs(logger_two, logger)
 
     def test_logger_atexit(self):
         '''Logger registers an atexit function to clean up'''
@@ -105,6 +105,12 @@ class TestInit(ClearEnvTest):
             logger = stackify.getLogger(config=self.config)
             self.loggers.append(logger)
         func.assert_called_with(stackify.stopLogging, logger)
+
+    def test_get_handlers(self):
+        '''Registered handlers are provided by getHandlers'''
+        logger = stackify.getLogger(config=self.config, auto_shutdown=False)
+        self.loggers.append(logger)
+        self.assertEqual(logger.handlers, stackify.getHandlers(logger))
 
 
 if __name__=='__main__':
