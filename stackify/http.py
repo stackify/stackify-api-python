@@ -70,7 +70,7 @@ class HTTPClient:
             internal_log.exception('Cannot decode JSON response')
             raise
 
-    #@retrying.retry(wait_exponential_multiplier=1000, stop_max_delay=10000)
+    @retrying.retry(wait_exponential_multiplier=1000, stop_max_delay=10000)
     def identify_application(self):
         result = self.POST('/Metrics/IdentifyApp', self.environment_detail)
         self.app_name_id = result.get('AppNameID')
