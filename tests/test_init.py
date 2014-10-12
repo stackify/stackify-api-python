@@ -98,12 +98,11 @@ class TestInit(ClearEnvTest):
         logger_two = stackify.getLogger(config=self.config, auto_shutdown=False)
         self.assertIs(logger_two, logger)
 
-    def test_logger_atexit(self):
+    @patch('atexit.register')
+    def test_logger_atexit(self, func):
         '''Logger registers an atexit function to clean up'''
-        func = Mock()
-        with patch('atexit.register', func):
-            logger = stackify.getLogger(config=self.config)
-            self.loggers.append(logger)
+        logger = stackify.getLogger(config=self.config)
+        self.loggers.append(logger)
         func.assert_called_with(stackify.stopLogging, logger)
 
     def test_get_handlers(self):

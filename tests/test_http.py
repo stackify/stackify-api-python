@@ -92,14 +92,13 @@ class TestClient(unittest.TestCase):
         self.assertEqual(client.device_alias, '5')
         self.assertTrue(client.identified)
 
-    def test_post_arguments(self):
+    @patch('requests.post')
+    def test_post_arguments(self, post):
         '''HTTP post has correct headers'''
         client = stackify.http.HTTPClient(self.config)
-        post = Mock()
         payload = Mock()
 
-        with patch('requests.post', post):
-            client.POST('url', payload)
+        client.POST('url', payload)
 
         headers = {
             'Content-Type': 'application/json',
@@ -113,17 +112,16 @@ class TestClient(unittest.TestCase):
         self.assertEquals(kwargs['timeout'], READ_TIMEOUT)
         self.assertEquals(kwargs['data'], payload.toJSON())
 
-    def test_post_gzip(self):
+    @patch('requests.post')
+    def test_post_gzip(self, post):
         '''HTTP post uses gzip if requested'''
         client = stackify.http.HTTPClient(self.config)
-        post = Mock()
         payload = Mock()
         payload.toJSON = Mock(return_value='1')
         gzip = Mock(side_effect=lambda x: x + '_gzipped')
 
-        with patch('requests.post', post):
-            with patch.object(stackify.http, 'gzip_compress', gzip):
-                client.POST('url', payload, use_gzip=True)
+        with patch.object(stackify.http, 'gzip_compress', gzip):
+            client.POST('url', payload, use_gzip=True)
 
         self.assertTrue(post.called)
         args, kwargs = post.call_args
