@@ -4,7 +4,7 @@ Test the stackify.__init__ setup functions
 """
 
 import unittest
-from mock import patch
+from mock import patch, Mock
 from bases import ClearEnvTest
 
 import os
@@ -91,7 +91,19 @@ class TestInit(ClearEnvTest):
         self.assertEqual(handler.queue.maxsize, stackify.QUEUE_SIZE)
 
     def test_get_logger_reuse(self):
-        pass
+        '''Grabbing a logger twice results in the same logger'''
+        logger = stackify.getLogger(config=self.config, auto_shutdown=False)
+        self.loggers.append(logger)
+        logger_two = stackify.getLogger(config=self.config, auto_shutdown=False)
+        self.assertEqual(id(logger_two), id(logger))
+
+    def test_logger_atexit(self):
+        '''Logger registers an atexit function to clean up'''
+        func = Mock()
+        with patch('atexit.register', func):
+            logger = stackify.getLogger(config=self.config)
+            self.loggers.append(logger)
+        func.assert_called_with(stackify.stopLogging, logger)
 
 
 if __name__=='__main__':
