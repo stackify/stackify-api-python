@@ -6,6 +6,7 @@ Test the stackify.log module
 import unittest
 from mock import patch, Mock
 import json
+import sys
 
 import stackify.log
 
@@ -37,6 +38,24 @@ class TestLogPopulate(unittest.TestCase):
         self.assertEqual(msg.Msg, 'message')
         self.assertTrue(msg.EpochMs <= curr_ms)
         self.assertEqual(json.loads(msg.data), {'my_extra':[1,2,3]})
+
+    def test_record_exception(self):
+        '''LogMsgs can parse exception information'''
+        try:
+            1/0
+        except:
+            record = logging.LogRecord('my exception',logging.WARNING,'somepath',12,
+                    'a thing happened',(),sys.exc_info())
+
+        msg = LogMsg()
+        msg.from_record(record)
+
+        self.assertEqual(msg.Ex.OccurredEpochMillis, msg.EpochMs)
+        stack = msg.Ex.Error.StackTrace[0]
+        self.assertTrue(stack.CodeFileName.endswith('test_log.py'))
+        self.assertEqual(msg.Ex.Error.Message, 'integer division or modulo by zero')
+        self.assertEqual(msg.Ex.Error.ErrorType, 'ZeroDivisionError')
+        self.assertEqual(msg.Ex.Error.SourceMethod, 'test_record_exception')
 
 
 if __name__=='__main__':
