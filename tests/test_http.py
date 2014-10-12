@@ -67,6 +67,30 @@ class TestClient(unittest.TestCase):
                 client.identify_application()
         self.assertEqual(crash.call_count, FAKE_RETRIES)
 
+    def test_identify(self):
+        '''HTTP identify should save results'''
+        client = stackify.http.HTTPClient(self.config)
+        self.assertFalse(client.identified)
+
+        result = {
+            'AppNameID': '1',
+            'AppEnvID': '2',
+            'DeviceID': '3',
+            'DeviceAppID': '4',
+            'DeviceAlias': '5',
+        }
+        post = Mock(return_value=result)
+
+        with patch.object(client, 'POST', post):
+            client.identify_application()
+
+        self.assertEqual(client.app_name_id, '1')
+        self.assertEqual(client.app_env_id, '2')
+        self.assertEqual(client.device_id, '3')
+        self.assertEqual(client.device_app_id, '4')
+        self.assertEqual(client.device_alias, '5')
+        self.assertTrue(client.identified)
+
 
 if __name__=='__main__':
     unittest.main()
