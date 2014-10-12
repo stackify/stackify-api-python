@@ -113,6 +113,23 @@ class TestClient(unittest.TestCase):
         self.assertEquals(kwargs['timeout'], READ_TIMEOUT)
         self.assertEquals(kwargs['data'], payload.toJSON())
 
+    def test_post_gzip(self):
+        '''HTTP post uses gzip if requested'''
+        client = stackify.http.HTTPClient(self.config)
+        post = Mock()
+        payload = Mock()
+        payload.toJSON = Mock(return_value='1')
+        gzip = Mock(side_effect=lambda x: x + '_gzipped')
+
+        with patch('requests.post', post):
+            with patch.object(stackify.http, 'gzip_compress', gzip):
+                client.POST('url', payload, use_gzip=True)
+
+        self.assertTrue(post.called)
+        args, kwargs = post.call_args
+        self.assertEquals(kwargs['headers']['Content-Encoding'], 'gzip')
+        self.assertEquals(kwargs['data'], '1_gzipped')
+
 
 
 if __name__=='__main__':
