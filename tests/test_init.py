@@ -89,6 +89,7 @@ class TestInit(ClearEnvTest):
         self.assertEqual(config.api_url, stackify.API_URL)
         self.assertEqual(handler.listener.max_batch, stackify.MAX_BATCH)
         self.assertEqual(handler.queue.maxsize, stackify.QUEUE_SIZE)
+        self.assertEqual(logger.getEffectiveLevel(), logging.WARNING)
 
     def test_get_logger_reuse(self):
         '''Grabbing a logger twice results in the same logger'''
