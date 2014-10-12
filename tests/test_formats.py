@@ -39,6 +39,18 @@ class TestJSONObject(unittest.TestCase):
 
         self.assertEqual(json.loads(result), {'children': [{'color': 'red'}, {'color': 'green'}]})
 
+    def test_nonempty_attributes(self):
+        '''Only nonempty attributes are serialized'''
+        class MyTest(JSONObject):
+            def __init__(self):
+                self.a = '1'
+                self.b = False
+                self.c = None
+                self.d = []
+        result = MyTest().toJSON()
+
+        self.assertEqual(json.loads(result), {'a': '1', 'b': False, 'd': []})
+
 
 if __name__=='__main__':
     unittest.main()
