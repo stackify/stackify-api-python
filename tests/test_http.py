@@ -12,6 +12,7 @@ retrying_mock = Mock()
 import stackify.http
 
 from stackify.application import ApiConfiguration
+from stackify import READ_TIMEOUT
 
 
 old_retry = retrying.retry
@@ -90,6 +91,28 @@ class TestClient(unittest.TestCase):
         self.assertEqual(client.device_app_id, '4')
         self.assertEqual(client.device_alias, '5')
         self.assertTrue(client.identified)
+
+    def test_post_arguments(self):
+        '''HTTP post has correct headers'''
+        client = stackify.http.HTTPClient(self.config)
+        post = Mock()
+        payload = Mock()
+
+        with patch('requests.post', post):
+            client.POST('url', payload)
+
+        headers = {
+            'Content-Type': 'application/json',
+            'X-Stackify-Key': self.config.api_key,
+            'X-Stackify-PV': 'V1',
+        }
+
+        self.assertTrue(post.called)
+        args, kwargs = post.call_args
+        self.assertEquals(kwargs['headers'], headers)
+        self.assertEquals(kwargs['timeout'], READ_TIMEOUT)
+        self.assertEquals(kwargs['data'], payload.toJSON())
+
 
 
 if __name__=='__main__':
