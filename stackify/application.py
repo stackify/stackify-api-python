@@ -24,7 +24,10 @@ class ApiConfiguration:
 def arg_or_env(name, args, default=None):
     env_name = 'STACKIFY_{0}'.format(name.upper())
     try:
-        return args.get(name, os.environ[env_name])
+        value = args.get(name)
+        if not value:
+            value = os.environ[env_name]
+        return value
     except KeyError:
         if default:
             return default
@@ -38,5 +41,5 @@ def get_configuration(**kwargs):
             application = arg_or_env('application', kwargs),
             environment = arg_or_env('environment', kwargs),
             api_key = arg_or_env('api_key', kwargs),
-            api_url = arg_or_env('api_url', kwargs))
+            api_url = arg_or_env('api_url', kwargs, API_URL))
 

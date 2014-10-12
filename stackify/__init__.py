@@ -45,7 +45,7 @@ from stackify.handler import StackifyHandler
 __listener_cache = {}
 
 
-def getLogger(name=None, **kwargs):
+def getLogger(name=None, auto_shutdown=True, **kwargs):
     '''
     Get a logger and attach a StackifyHandler if needed.
     '''
@@ -59,7 +59,8 @@ def getLogger(name=None, **kwargs):
         handler = StackifyHandler(**kwargs)
         logger.addHandler(handler)
 
-        atexit.register(stopLogging, logger)
+        if auto_shutdown:
+            atexit.register(stopLogging, logger)
 
         if logger.getEffectiveLevel() == logging.NOTSET:
             logger.setLevel(DEFAULT_LEVEL)
