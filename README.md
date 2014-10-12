@@ -14,7 +14,7 @@ except:
     logger.exception("Can't add strings and numbers")
 ```
 
-## Install
+## Installation
 stackify-python can be installed through pip:
 ```bash
 $ pip install -U stackify
@@ -25,17 +25,12 @@ You can also check out the repository and install with setuptools:
 $ ./setup.py install
 ```
 
-## Setup
+## Configuration
 Your Stackify setup information can be provided via environment variables. For example:
 ```bash
 export STACKIFY_APPLICATION=MyApp
 export STACKIFY_ENVIRONMENT=Dev
 export STACKIFY_API_KEY=******
-```
-
-You can optionally provide your API_URL:
-```bash
-export STACKIFY_API_URL='http://myapi.stackify.com'
 ```
 
 These options can also be provided in your code:
@@ -47,6 +42,9 @@ logger.warning('Something happened')
 ```
 
 ## Usage
+
+stackify-python handles uploads in batches of 100 messages at a time on another thread.
+When your program exits, it will shut the thread down and upload the remaining messages.
 
 Stackify can store extra data along with your log message:
 ```python
