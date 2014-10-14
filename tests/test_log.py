@@ -24,7 +24,7 @@ class TestLogPopulate(unittest.TestCase):
     def test_record_to_error(self):
         '''LogMsgs can load logger records'''
         record = logging.LogRecord('name',logging.WARNING,'pathname',32,
-                'message',(),(),'func')
+                'message %s',('here'),(),'func')
         record.my_extra = [1,2,3]
         msg = LogMsg()
         msg.from_record(record)
@@ -34,7 +34,7 @@ class TestLogPopulate(unittest.TestCase):
         self.assertEqual(msg.SrcMethod, 'func')
         self.assertEqual(msg.SrcLine, 32)
         self.assertEqual(msg.Th, 'MainThread')
-        self.assertEqual(msg.Msg, 'message')
+        self.assertEqual(msg.Msg, 'message here')
         self.assertTrue(msg.EpochMs <= curr_ms)
         self.assertEqual(json.loads(msg.data), {'my_extra':[1,2,3]})
 

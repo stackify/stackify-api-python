@@ -9,6 +9,7 @@ from stackify.error import StackifyError
 
 # this is used to separate builtin keys from user-specified keys
 RECORD_VARS = set(logging.LogRecord('','','','','','','','').__dict__.keys())
+RECORD_VARS.add('message') # message is saved on the record object by a Formatter sometimes
 
 
 class LogMsg(JSONObject):
