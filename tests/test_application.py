@@ -5,7 +5,7 @@ Test the stackify.application module
 import unittest
 from mock import patch
 import os
-from bases import ClearEnvTest
+from .bases import ClearEnvTest
 
 from stackify import API_URL
 from stackify.application import get_configuration

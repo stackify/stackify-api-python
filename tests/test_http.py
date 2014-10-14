@@ -4,6 +4,7 @@ Test the stackify.http module
 
 import unittest
 from mock import patch, Mock
+import imp
 
 import retrying
 import stackify.http
@@ -19,8 +20,6 @@ def fake_retry_decorator(retries):
         kwargs['wait_exponential_max'] = 0 # no delay between retries
         kwargs['stop_max_attempt_number'] = retries
         def inner(func):
-            print '!'*80
-            print 'using retrying mock', kwargs
             return old_retry(*args, **kwargs)(func)
         return inner
     return fake_retry
@@ -34,19 +33,13 @@ class TestClient(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.FAKE_RETRIES = 3
-        print '!'*80
-        print 'another retry', retrying.retry
         retrying.retry = fake_retry_decorator(cls.FAKE_RETRIES)
-        print 'patched retry', retrying.retry
-        reload(stackify.http)
-        print 'func is', stackify.http.HTTPClient.POST
+        imp.reload(stackify.http)
 
     @classmethod
     def tearDownClass(cls):
-        print '!'*80
-        print 'teardown'
-        reload(retrying)
-        reload(stackify.http)
+        imp.reload(retrying)
+        imp.reload(stackify.http)
 
     def setUp(self):
         self.config = ApiConfiguration(
@@ -59,9 +52,9 @@ class TestClient(unittest.TestCase):
 
     def test_logger_no_config(self):
         '''GZIP encoder works'''
-        correct = list('\x1f\x8b\x08\x00    \x02\xff\xf3H\xcd\xc9\xc9\xd7Q(\xcf/\xcaIQ\x04\x00\xe6\xc6\xe6\xeb\r\x00\x00\x00')
+        correct = list(b'\x1f\x8b\x08\x00\x00\x00\x00\x00\x02\xff\xf3H\xcd\xc9\xc9\xd7Q(\xcf/\xcaIQ\x04\x00\xe6\xc6\xe6\xeb\r\x00\x00\x00')
         gzipped = list(stackify.http.gzip_compress('Hello, world!'))
-        gzipped[4:8] = '    ' # blank the mtime
+        gzipped[4:8] = b'\x00\x00\x00\x00' # blank the mtime
         self.assertEqual(gzipped, correct)
 
     def test_identify_retrying(self):

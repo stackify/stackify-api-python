@@ -40,8 +40,12 @@ class TestLogPopulate(unittest.TestCase):
 
     def test_record_exception(self):
         '''LogMsgs can parse exception information'''
+        class CustomException(Exception):
+            def __str__(self):
+                return 'My custom exception'
+
         try:
-            1/0
+            raise CustomException()
         except:
             record = logging.LogRecord('my exception',logging.WARNING,'somepath',12,
                     'a thing happened',(),sys.exc_info())
@@ -52,8 +56,8 @@ class TestLogPopulate(unittest.TestCase):
         self.assertEqual(msg.Ex.OccurredEpochMillis, msg.EpochMs)
         stack = msg.Ex.Error.StackTrace[0]
         self.assertTrue(stack.CodeFileName.endswith('test_log.py'))
-        self.assertEqual(msg.Ex.Error.Message, 'integer division or modulo by zero')
-        self.assertEqual(msg.Ex.Error.ErrorType, 'ZeroDivisionError')
+        self.assertEqual(msg.Ex.Error.Message, 'My custom exception')
+        self.assertEqual(msg.Ex.Error.ErrorType, 'CustomException')
         self.assertEqual(msg.Ex.Error.SourceMethod, 'test_record_exception')
 
 

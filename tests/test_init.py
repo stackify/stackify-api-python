@@ -4,7 +4,7 @@ Test the stackify.__init__ setup functions
 
 import unittest
 from mock import patch, Mock
-from bases import ClearEnvTest
+from .bases import ClearEnvTest
 
 import os
 import atexit
