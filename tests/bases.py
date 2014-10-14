@@ -1,5 +1,6 @@
 import os
 import unittest
+import retrying
 
 class ClearEnvTest(unittest.TestCase):
     '''
@@ -26,3 +27,4 @@ class ClearEnvTest(unittest.TestCase):
         for key, item in self.saved.items():
             os.environ[key] = item
         del self.saved
+

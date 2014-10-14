@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Test the stackify.handler module
 """
@@ -49,12 +48,12 @@ class TestListener(unittest.TestCase):
 
     @patch('stackify.handler.LogMsg')
     @patch('stackify.handler.StackifyListener.send_group')
-    @patch('stackify.http.HTTPClient.identify_application')
-    def test_not_identified(self, ident, send_group, logmsg):
+    @patch('stackify.handler.HTTPClient.POST')
+    def test_not_identified(self, post, send_group, logmsg):
         '''The HTTPClient identifies automatically if needed'''
         listener = StackifyListener(queue_=Mock(), config=self.config)
         listener.handle(Mock())
-        self.assertTrue(ident.called)
+        self.assertTrue(listener.http.identified)
 
     @patch('stackify.handler.LogMsg')
     @patch('stackify.handler.LogMsgGroup')
@@ -89,6 +88,24 @@ class TestListener(unittest.TestCase):
         self.assertFalse(send_group.called)
         listener.stop()
         self.assertTrue(send_group.called)
+
+    @patch('stackify.handler.LogMsg')
+    @patch('stackify.handler.LogMsgGroup')
+    @patch('stackify.handler.HTTPClient.send_log_group')
+    def test_send_group_crash(self, send_log_group, logmsggroup, logmsg):
+        '''The listener drops messages after retrying'''
+        listener = StackifyListener(queue_=Mock(), max_batch=3, config=self.config)
+        listener.http.identified = True
+
+        send_log_group.side_effect = Exception
+
+        listener.handle(1)
+        listener.handle(2)
+        listener.handle(3)
+        self.assertEqual(len(listener.messages), 0)
+        listener.handle(4)
+        self.assertEqual(len(listener.messages), 1)
+        self.assertEqual(send_log_group.call_count, 1)
 
 
 if __name__=='__main__':

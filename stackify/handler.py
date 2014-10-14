@@ -65,9 +65,8 @@ class StackifyListener(QueueListener):
         self.http = HTTPClient(config)
 
     def handle(self, record):
-        logger = logging.getLogger(__name__)
-
         if not self.http.identified:
+            logger = logging.getLogger(__name__)
             logger.debug('Identifying application')
             self.http.identify_application()
 
@@ -80,7 +79,11 @@ class StackifyListener(QueueListener):
 
     def send_group(self):
         group = LogMsgGroup(self.messages)
-        self.http.POST('/Log/Save', group, True)
+        try:
+            self.http.send_log_group(group)
+        except:
+            logger = logging.getLogger(__name__)
+            logger.exception('Could not send %s log messages, discarding', len(self.messages))
         del self.messages[:]
 
     def stop(self):

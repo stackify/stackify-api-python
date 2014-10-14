@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Test the stackify.__init__ setup functions
 """

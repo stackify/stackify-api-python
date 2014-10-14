@@ -25,7 +25,8 @@ setup(
     ],
     test_suite = 'tests',
     tests_requires = [
-        'mock>=1.0.1'
+        'mock>=1.0.1',
+        'nose==1.3.4'
     ]
 )
 

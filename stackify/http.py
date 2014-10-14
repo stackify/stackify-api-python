@@ -40,8 +40,8 @@ class HTTPClient:
 
     def POST(self, url, json_object, use_gzip=False):
         request_url = self.api_config.api_url + url
-        internal_log = logging.getLogger(__name__)
-        internal_log.debug('Request URL: %s', request_url)
+        logger = logging.getLogger(__name__)
+        logger.debug('Request URL: %s', request_url)
 
         headers = {
             'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ class HTTPClient:
 
         try:
             payload_data = json_object.toJSON()
-            internal_log.debug('POST data: %s', payload_data)
+            logger.debug('POST data: %s', payload_data)
 
             if use_gzip:
                 headers['Content-Encoding'] = 'gzip'
@@ -60,14 +60,14 @@ class HTTPClient:
             response = requests.post(request_url,
                         data=payload_data, headers=headers,
                         timeout=READ_TIMEOUT)
-            internal_log.debug('Response: %s', response.text)
+            logger.debug('Response: %s', response.text)
             return response.json()
         except requests.exceptions.RequestException:
-            interal_log.exception('HTTP exception:')
+            logger.exception('HTTP exception')
             raise
         except ValueError as e:
             # could not read json response
-            internal_log.exception('Cannot decode JSON response')
+            logger.exception('Cannot decode JSON response')
             raise
 
     @retrying.retry(wait_exponential_multiplier=1000, stop_max_delay=10000)
@@ -79,4 +79,13 @@ class HTTPClient:
         self.device_app_id = result.get('DeviceAppID')
         self.device_alias = result.get('DeviceAlias')
         self.identified = True
+
+    @retrying.retry(wait_exponential_multiplier=1000, stop_max_delay=10000)
+    def send_log_group(self, group):
+        group.CDID = self.device_id
+        group.CDAppID = self.device_app_id
+        group.AppNameID = self.app_name_id
+        group.ServerName = self.device_alias or self.environment_detail.deviceName
+        self.POST('/Log/Save', group, True)
+
 

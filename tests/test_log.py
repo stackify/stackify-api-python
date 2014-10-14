@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Test the stackify.log module
 """
