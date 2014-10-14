@@ -28,6 +28,7 @@ class StackifyHandler(QueueHandler):
     def __init__(self, queue_=None, listener=None, **kwargs):
         if queue_ is None:
             queue_ = queue.Queue(QUEUE_SIZE)
+        logger = logging.getLogger(__name__)
 
         super(StackifyHandler, self).__init__(queue_)
 
@@ -40,10 +41,10 @@ class StackifyHandler(QueueHandler):
         '''
         Put a new record on the queue. If it's full, evict an item.
         '''
-        logger = logging.getLogger(__name__)
         try:
             self.queue.put_nowait(record)
         except queue.Full:
+            logger = logging.getLogger(__name__)
             logger.warn('StackifyHandler queue is full, evicting oldest record')
             self.queue.get_nowait()
             self.queue.put_nowait(record)

@@ -28,7 +28,11 @@ LOGGING_LEVELS = {
     logging.NOTSET: 'NOTSET'
 }
 
-logging.basicConfig()
+class NullHandler(logging.Handler):
+    def emit(self, record):
+        pass
+
+logging.getLogger(__name__).addHandler(NullHandler())
 
 
 from stackify.application import ApiConfiguration
@@ -37,28 +41,26 @@ from stackify.http import HTTPClient
 from stackify.handler import StackifyHandler
 
 
-# TODO
-# holds our listeners, since more than one handler can service
-# the same listener
-__listener_cache = {}
-
-
-def getLogger(name=None, auto_shutdown=True, **kwargs):
+def getLogger(name=None, auto_shutdown=True, basic_config=True, **kwargs):
     '''
     Get a logger and attach a StackifyHandler if needed.
     '''
+    if basic_config:
+        logging.basicConfig()
+
     if not name:
         name = getCallerName(2)
 
     logger = logging.getLogger(name)
 
     if not [isinstance(x, StackifyHandler) for x in logger.handlers]:
-        logger = logging.getLogger(__name__)
-        logger.debug('Creating handler for logger %s', name)
+        internal_logger = logging.getLogger(__name__)
+        internal_logger.debug('Creating handler for logger %s', name)
         handler = StackifyHandler(**kwargs)
         logger.addHandler(handler)
 
         if auto_shutdown:
+            internal_logger.debug('Registering atexit callback')
             atexit.register(stopLogging, logger)
 
         if logger.getEffectiveLevel() == logging.NOTSET:
@@ -73,8 +75,8 @@ def stopLogging(logger):
     Shut down the StackifyHandler on a given logger. This will block
     and wait for the queue to finish uploading.
     '''
-    logger = logging.getLogger(__name__)
-    logger.debug('Shutting down all handlers')
+    internal_logger = logging.getLogger(__name__)
+    internal_logger.debug('Shutting down all handlers')
     for handler in getHandlers(logger):
         handler.listener.stop()
 

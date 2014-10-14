@@ -12,7 +12,6 @@ except ImportError:
 
 from stackify.handler import StackifyHandler, StackifyListener
 from stackify.application import ApiConfiguration
-from stackify import internal_log
 
 import logging
 
@@ -26,7 +25,8 @@ class TestHandler(unittest.TestCase):
         '''The queue should evict when full'''
         q = queue.Queue(1)
         handler = StackifyHandler(queue_=q, listener=Mock())
-        internal_log.setLevel(logging.CRITICAL) # don't print warnings on overflow
+        # don't print warnings on overflow, so mute stackify logger
+        logging.getLogger('stackify').propagate = False
         handler.enqueue('test1')
         handler.enqueue('test2')
         handler.enqueue('test3')
@@ -45,6 +45,8 @@ class TestListener(unittest.TestCase):
             environment = 'test_environment',
             api_key = 'test_apikey',
             api_url = 'test_apiurl')
+        # don't print warnings on http crashes, so mute stackify logger
+        logging.getLogger('stackify').propagate = False
 
     @patch('stackify.handler.LogMsg')
     @patch('stackify.handler.StackifyListener.send_group')
