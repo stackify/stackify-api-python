@@ -59,6 +59,32 @@ except ValueError:
     logger.exception('Bad input', extra={'user entered': user_string})
 ```
 
+You can also name your logger instead of using the automatically generated one:
+```python
+import stackify
+
+logger = stackify.getLogger('mymodule.myfile')
+```
+
+## Internal Logger
+
+This library has an internal logger it uses for debugging and messaging.
+For example, if you want to enable debug messages:
+```python
+import logging
+
+logging.getLogger('stackify').setLevel(logging.DEBUG)
+```
+
+By default, it will enable the default logging settings via `logging.basicConfig()`
+and print `WARNING` level messages and above. If you wish to set everything up yourself,
+just pass `basic_config=False` in `getLogger`:
+```python
+import stackify
+
+logger = stackify.getLogger(basic_config=False)
+```
+
 ## Testing
 Run the test suite with setuptools:
 ```bash
