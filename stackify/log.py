@@ -17,12 +17,10 @@ class LogMsg(JSONObject):
         self.Msg = None
         self.data = None
         self.Ex = None # a StackifyError object
-        #self.Th = threading.current_thread().ident
         self.Th = None
         self.EpochMs = None
         self.Level = None
         self.TransID = None
-        # filename, line_number, function = internal_log.findCaller()
         self.SrcMethod = None
         self.SrcLine = None
 

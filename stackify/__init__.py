@@ -30,8 +30,6 @@ LOGGING_LEVELS = {
 
 logging.basicConfig()
 
-internal_log = logging.getLogger(__name__)
-
 
 from stackify.application import ApiConfiguration
 from stackify.http import HTTPClient
@@ -55,7 +53,8 @@ def getLogger(name=None, auto_shutdown=True, **kwargs):
     logger = logging.getLogger(name)
 
     if not [isinstance(x, StackifyHandler) for x in logger.handlers]:
-        internal_log.debug('Creating handler for logger %s', name)
+        logger = logging.getLogger(__name__)
+        logger.debug('Creating handler for logger %s', name)
         handler = StackifyHandler(**kwargs)
         logger.addHandler(handler)
 
@@ -74,7 +73,8 @@ def stopLogging(logger):
     Shut down the StackifyHandler on a given logger. This will block
     and wait for the queue to finish uploading.
     '''
-    internal_log.debug('Shutting down all handlers')
+    logger = logging.getLogger(__name__)
+    logger.debug('Shutting down all handlers')
     for handler in getHandlers(logger):
         handler.listener.stop()
 
