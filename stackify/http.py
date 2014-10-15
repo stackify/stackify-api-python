@@ -9,12 +9,12 @@ except:
     try:
         from StringIO import StringIO
     except:
-        pass # python 3, we use a new function in gzip
+        pass  # python 3, we use a new function in gzip
 
 
 def gzip_compress(data):
     if hasattr(gzip, 'compress'):
-        return gzip.compress(bytes(data, 'utf-8')) # python 3
+        return gzip.compress(bytes(data, 'utf-8'))  # python 3
     else:
         s = StringIO()
         g = gzip.GzipFile(fileobj=s, mode='w')
@@ -58,8 +58,9 @@ class HTTPClient:
                 payload_data = gzip_compress(payload_data)
 
             response = requests.post(request_url,
-                        data=payload_data, headers=headers,
-                        timeout=READ_TIMEOUT)
+                                     data=payload_data,
+                                     headers=headers,
+                                     timeout=READ_TIMEOUT)
             logger.debug('Response: %s', response.text)
             return response.json()
         except requests.exceptions.RequestException:
@@ -85,7 +86,7 @@ class HTTPClient:
         group.CDID = self.device_id
         group.CDAppID = self.device_app_id
         group.AppNameID = self.app_name_id
-        group.ServerName = self.device_alias or self.environment_detail.deviceName
+        group.ServerName = self.device_alias
+        if not group.ServerName:
+            group.ServerName = self.environment_detail.deviceName
         self.POST('/Log/Save', group, True)
-
-

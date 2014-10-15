@@ -126,7 +126,7 @@ class QueueListener(object):
         t.setDaemon(True)
         t.start()
 
-    def prepare(self , record):
+    def prepare(self, record):
         """
         Prepare a record for handling.
 
@@ -201,4 +201,3 @@ class QueueListener(object):
         self.enqueue_sentinel()
         self._thread.join()
         self._thread = None
-

@@ -32,14 +32,13 @@ def arg_or_env(name, args, default=None):
         if default:
             return default
         else:
-            raise NameError('You must specify the keyword argument {0} or environment variable {1}'.format(
-                name, env_name))
+            raise NameError('You must specify the keyword argument {0} or '
+                            'environment variable {1}'.format(name, env_name))
 
 
 def get_configuration(**kwargs):
         return ApiConfiguration(
-            application = arg_or_env('application', kwargs),
-            environment = arg_or_env('environment', kwargs),
-            api_key = arg_or_env('api_key', kwargs),
-            api_url = arg_or_env('api_url', kwargs, API_URL))
-
+            application=arg_or_env('application', kwargs),
+            environment=arg_or_env('environment', kwargs),
+            api_key=arg_or_env('api_key', kwargs),
+            api_url=arg_or_env('api_url', kwargs, API_URL))

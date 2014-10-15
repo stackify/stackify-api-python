@@ -28,6 +28,7 @@ LOGGING_LEVELS = {
     logging.NOTSET: 'NOTSET'
 }
 
+
 class NullHandler(logging.Handler):
     def emit(self, record):
         pass
@@ -70,6 +71,7 @@ def getLogger(name=None, auto_shutdown=True, basic_config=True, **kwargs):
 
     return logger
 
+
 def stopLogging(logger):
     '''
     Shut down the StackifyHandler on a given logger. This will block
@@ -99,4 +101,3 @@ def getHandlers(logger):
     Return the StackifyHandlers on a given logger
     '''
     return [x for x in logger.handlers if isinstance(x, StackifyHandler)]
-

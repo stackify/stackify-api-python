@@ -7,13 +7,13 @@ from stackify.formats import JSONObject
 
 class ErrorItem(JSONObject):
     def __init__(self):
-        self.Message = None # exception message
-        self.ErrorType = None # exception class name
+        self.Message = None  # exception message
+        self.ErrorType = None  # exception class name
         self.ErrorTypeCode = None
-        self.Data = None # custom data
+        self.Data = None  # custom data
         self.SourceMethod = None
-        self.StackTrace = [] # array of TraceFrames
-        self.InnerError = None # cause?
+        self.StackTrace = []  # array of TraceFrames
+        self.InnerError = None  # cause?
 
     def load_stack(self, exc_info=None):
         if not exc_info:
@@ -58,10 +58,10 @@ class WebRequestDetail(JSONObject):
 
 class StackifyError(JSONObject):
     def __init__(self):
-        self.EnvironmentDetail = None # environment detail object
+        self.EnvironmentDetail = None  # environment detail object
         self.OccurredEpochMillis = None
-        self.Error = None # ErrorItem object
-        self.WebRequestDetail = None # WebRequestDetail object
+        self.Error = None  # ErrorItem object
+        self.WebRequestDetail = None  # WebRequestDetail object
         self.CustomerName = None
         self.UserName = None
 
@@ -72,5 +72,3 @@ class StackifyError(JSONObject):
     def from_record(self, record):
         self.load_exception(record.exc_info)
         self.OccurredEpochMillis = int(record.created * 1000)
-
-

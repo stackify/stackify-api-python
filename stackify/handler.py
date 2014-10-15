@@ -4,12 +4,12 @@ import os
 
 try:
     from logging.handlers import QueueHandler, QueueListener
-except: # pragma: no cover
+except:  # pragma: no cover
     from stackify.handler_backport import QueueHandler, QueueListener
 
 try:
     import Queue as queue
-except ImportError: # pragma: no cover
+except ImportError:  # pragma: no cover
     import queue
 
 from stackify import QUEUE_SIZE, API_URL, MAX_BATCH
@@ -45,7 +45,8 @@ class StackifyHandler(QueueHandler):
             self.queue.put_nowait(record)
         except queue.Full:
             logger = logging.getLogger(__name__)
-            logger.warn('StackifyHandler queue is full, evicting oldest record')
+            logger.warn('StackifyHandler queue is full, '
+                        'evicting oldest record')
             self.queue.get_nowait()
             self.queue.put_nowait(record)
 
@@ -84,7 +85,8 @@ class StackifyListener(QueueListener):
             self.http.send_log_group(group)
         except:
             logger = logging.getLogger(__name__)
-            logger.exception('Could not send %s log messages, discarding', len(self.messages))
+            logger.exception('Could not send %s log messages, discarding',
+                             len(self.messages))
         del self.messages[:]
 
     def stop(self):
@@ -94,6 +96,6 @@ class StackifyListener(QueueListener):
 
         # send any remaining messages
         if self.messages:
-            logger.debug('%s messages left on shutdown, uploading', len(self.messages))
+            logger.debug('%s messages left on shutdown, uploading',
+                         len(self.messages))
             self.send_group()
-
