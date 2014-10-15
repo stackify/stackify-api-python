@@ -43,8 +43,28 @@ from stackify.handler import StackifyHandler
 
 
 def getLogger(name=None, auto_shutdown=True, basic_config=True, **kwargs):
-    '''
-    Get a logger and attach a StackifyHandler if needed.
+    '''Get a logger and attach a StackifyHandler if needed.
+
+    You can pass this function keyword arguments for Stackify configuration.
+    If they are omitted you can specify them through environment variables:
+     * STACKIFY_API_KEY
+     * STACKIFY_APPLICATION
+     * STACKIFY_ENVIRONMENT
+     * STACKIFY_API_URL
+
+    Args:
+        name: The name of the logger (or None to automatically make one)
+        auto_shutdown: Register an atexit hook to shut down logging
+        basic_config: Set up with logging.basicConfig() for regular logging
+
+    Optional Args:
+        api_key: Your Stackify API key
+        application: The name of your Stackify application
+        environment: The Stackfiy environment to log to
+        api_url: An optional API url if required
+
+    Returns:
+        A logger instance with Stackify handler and listener attached.
     '''
     if basic_config:
         logging.basicConfig()
@@ -73,7 +93,8 @@ def getLogger(name=None, auto_shutdown=True, basic_config=True, **kwargs):
 
 
 def stopLogging(logger):
-    '''
+    '''Stop logging on the Stackify handler.
+
     Shut down the StackifyHandler on a given logger. This will block
     and wait for the queue to finish uploading.
     '''
@@ -84,9 +105,7 @@ def stopLogging(logger):
 
 
 def getCallerName(levels=1):
-    '''
-    Gets the name of the module calling this function
-    '''
+    '''Gets the name of the module calling this function'''
     try:
         frame = inspect.stack()[levels]
         module = inspect.getmodule(frame[0])
@@ -97,7 +116,5 @@ def getCallerName(levels=1):
 
 
 def getHandlers(logger):
-    '''
-    Return the StackifyHandlers on a given logger
-    '''
+    '''Return the StackifyHandlers on a given logger'''
     return [x for x in logger.handlers if isinstance(x, StackifyHandler)]
