@@ -11,14 +11,16 @@ import stackify.http
 
 from stackify.log import LogMsgGroup
 from stackify.application import ApiConfiguration
-from stackify import READ_TIMEOUT
+from stackify.constants import READ_TIMEOUT
 
 old_retry = retrying.retry
 
+
 def fake_retry_decorator(retries):
     def fake_retry(*args, **kwargs):
-        kwargs['wait_exponential_max'] = 0 # no delay between retries
+        kwargs['wait_exponential_max'] = 0  # no delay between retries
         kwargs['stop_max_attempt_number'] = retries
+
         def inner(func):
             return old_retry(*args, **kwargs)(func)
         return inner
@@ -43,10 +45,11 @@ class TestClient(unittest.TestCase):
 
     def setUp(self):
         self.config = ApiConfiguration(
-            application = 'test_appname',
-            environment = 'test_environment',
-            api_key = 'test_apikey',
-            api_url = 'test_apiurl')
+            application='test_appname',
+            environment='test_environment',
+            api_key='test_apikey',
+            api_url='test_apiurl',
+        )
 
         self.client = stackify.http.HTTPClient(self.config)
 
@@ -54,14 +57,16 @@ class TestClient(unittest.TestCase):
         '''GZIP encoder works'''
         correct = list(b'\x1f\x8b\x08\x00\x00\x00\x00\x00\x02\xff\xf3H\xcd\xc9\xc9\xd7Q(\xcf/\xcaIQ\x04\x00\xe6\xc6\xe6\xeb\r\x00\x00\x00')
         gzipped = list(stackify.http.gzip_compress('Hello, world!'))
-        gzipped[4:8] = b'\x00\x00\x00\x00' # blank the mtime
+        gzipped[4:8] = b'\x00\x00\x00\x00'  # blank the mtime
         self.assertEqual(gzipped, correct)
 
     def test_identify_retrying(self):
         '''HTTP identify should retry'''
         client = self.client
 
-        class CustomException(Exception): pass
+        class CustomException(Exception):
+            pass
+
         crash = Mock(side_effect=CustomException)
 
         with patch.object(client, 'POST', crash):
@@ -97,7 +102,9 @@ class TestClient(unittest.TestCase):
         '''HTTP sending log groups should retry'''
         client = self.client
 
-        class CustomException(Exception): pass
+        class CustomException(Exception):
+            pass
+
         crash = Mock(side_effect=CustomException)
 
         group = LogMsgGroup([])
@@ -128,7 +135,6 @@ class TestClient(unittest.TestCase):
         self.assertEqual(group.AppNameID, client.app_name_id)
         self.assertEqual(group.ServerName, client.device_alias)
 
-
     @patch('requests.post')
     def test_post_arguments(self, post):
         '''HTTP post has correct headers'''
@@ -145,9 +151,9 @@ class TestClient(unittest.TestCase):
 
         self.assertTrue(post.called)
         args, kwargs = post.call_args
-        self.assertEquals(kwargs['headers'], headers)
-        self.assertEquals(kwargs['timeout'], READ_TIMEOUT)
-        self.assertEquals(kwargs['data'], payload.toJSON())
+        self.assertEqual(kwargs['headers'], headers)
+        self.assertEqual(kwargs['timeout'], READ_TIMEOUT)
+        self.assertEqual(kwargs['data'], payload.toJSON())
 
     @patch('requests.post')
     def test_post_gzip(self, post):
@@ -162,10 +168,9 @@ class TestClient(unittest.TestCase):
 
         self.assertTrue(post.called)
         args, kwargs = post.call_args
-        self.assertEquals(kwargs['headers']['Content-Encoding'], 'gzip')
-        self.assertEquals(kwargs['data'], '1_gzipped')
+        self.assertEqual(kwargs['headers']['Content-Encoding'], 'gzip')
+        self.assertEqual(kwargs['data'], '1_gzipped')
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()
-

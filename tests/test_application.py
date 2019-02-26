@@ -4,10 +4,9 @@ Test the stackify.application module
 
 import unittest
 from mock import patch
-import os
 from .bases import ClearEnvTest
 
-from stackify import API_URL
+from stackify.constants import API_URL
 from stackify.application import get_configuration
 
 
@@ -67,10 +66,11 @@ class TestConfig(ClearEnvTest):
     def test_kwargs(self):
         '''API configuration can load from kwargs'''
         config = get_configuration(
-                    application = 'test3_appname',
-                    environment = 'test3_environment',
-                    api_key = 'test3_apikey',
-                    api_url = 'test3_apiurl')
+            application='test3_appname',
+            environment='test3_environment',
+            api_key='test3_apikey',
+            api_url='test3_apiurl',
+        )
 
         self.assertEqual(config.application, 'test3_appname')
         self.assertEqual(config.environment, 'test3_environment')
@@ -80,9 +80,10 @@ class TestConfig(ClearEnvTest):
     def test_api_url_default(self):
         '''API URL is set automatically'''
         config = get_configuration(
-                    application = 'test4_appname',
-                    environment = 'test4_environment',
-                    api_key = 'test4_apikey')
+            application='test4_appname',
+            environment='test4_environment',
+            api_key='test4_apikey',
+        )
 
         self.assertEqual(config.application, 'test4_appname')
         self.assertEqual(config.environment, 'test4_environment')
@@ -90,6 +91,5 @@ class TestConfig(ClearEnvTest):
         self.assertEqual(config.api_url, API_URL)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()
-

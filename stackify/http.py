@@ -5,11 +5,16 @@ import gzip
 
 try:
     from cStringIO import StringIO
-except:
+except Exception:
     try:
         from StringIO import StringIO
-    except:
+    except Exception:
         pass  # python 3, we use a new function in gzip
+
+from stackify.application import EnvironmentDetail
+from stackify.constants import IDENTIFY_URL
+from stackify.constants import LOG_SAVE_URL
+from stackify.constants import READ_TIMEOUT
 
 
 def gzip_compress(data):
@@ -21,10 +26,6 @@ def gzip_compress(data):
         g.write(data)
         g.close()
         return s.getvalue()
-
-
-from stackify.application import EnvironmentDetail
-from stackify import READ_TIMEOUT
 
 
 class HTTPClient:
@@ -41,7 +42,7 @@ class HTTPClient:
     def POST(self, url, json_object, use_gzip=False):
         request_url = self.api_config.api_url + url
         logger = logging.getLogger(__name__)
-        logger.debug('Request URL: %s', request_url)
+        logger.debug('Request URL: {}'.format(request_url))
 
         headers = {
             'Content-Type': 'application/json',
@@ -51,7 +52,7 @@ class HTTPClient:
 
         try:
             payload_data = json_object.toJSON()
-            logger.debug('POST data: %s', payload_data)
+            logger.debug('POST data: {}'.format(payload_data))
 
             if use_gzip:
                 headers['Content-Encoding'] = 'gzip'
@@ -61,19 +62,17 @@ class HTTPClient:
                                      data=payload_data,
                                      headers=headers,
                                      timeout=READ_TIMEOUT)
-            logger.debug('Response: %s', response.text)
+            logger.debug('Response: {}'.format(response.text))
             return response.json()
         except requests.exceptions.RequestException:
             logger.exception('HTTP exception')
-            raise
-        except ValueError as e:
+        except ValueError:
             # could not read json response
             logger.exception('Cannot decode JSON response')
-            raise
 
     @retrying.retry(wait_exponential_multiplier=1000, stop_max_delay=10000)
     def identify_application(self):
-        result = self.POST('/Metrics/IdentifyApp', self.environment_detail)
+        result = self.POST(IDENTIFY_URL, self.environment_detail)
         self.app_name_id = result.get('AppNameID')
         self.app_env_id = result.get('AppEnvID')
         self.device_id = result.get('DeviceID')
@@ -87,6 +86,5 @@ class HTTPClient:
         group.CDAppID = self.device_app_id
         group.AppNameID = self.app_name_id
         group.ServerName = self.device_alias
-        if not group.ServerName:
-            group.ServerName = self.environment_detail.deviceName
-        self.POST('/Log/Save', group, True)
+        group.ServerName = group.ServerName or self.environment_detail.deviceName
+        self.POST(LOG_SAVE_URL, group, True)

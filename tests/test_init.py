@@ -3,11 +3,8 @@ Test the stackify.__init__ setup functions
 """
 
 import unittest
-from mock import patch, Mock
+from mock import patch
 from .bases import ClearEnvTest
-
-import os
-import atexit
 
 import stackify
 import logging
@@ -21,10 +18,10 @@ class TestInit(ClearEnvTest):
     def setUp(self):
         super(TestInit, self).setUp()
         self.config = stackify.ApiConfiguration(
-            application = 'test_appname',
-            environment = 'test_environment',
-            api_key = 'test_apikey',
-            api_url = 'test_apiurl')
+            application='test_appname',
+            environment='test_environment',
+            api_key='test_apikey',
+            api_url='test_apiurl')
         self.loggers = []
 
     def tearDown(self):
@@ -85,11 +82,11 @@ class TestInit(ClearEnvTest):
         config = handler.listener.http.api_config
 
         self.assertEqual(logger.name, 'tests.test_init')
-        self.assertEqual(config.api_url, stackify.API_URL)
-        self.assertEqual(handler.listener.max_batch, stackify.MAX_BATCH)
-        self.assertEqual(handler.queue.maxsize, stackify.QUEUE_SIZE)
+        self.assertEqual(config.api_url, stackify.constants.API_URL)
+        self.assertEqual(handler.listener.max_batch, stackify.constants.MAX_BATCH)
+        self.assertEqual(handler.queue.maxsize, stackify.constants.QUEUE_SIZE)
         # nose will goof with the following assert
-        #self.assertEqual(logger.getEffectiveLevel(), logging.WARNING)
+        # self.assertEqual(logger.getEffectiveLevel(), logging.WARNING)
 
     def test_get_logger_reuse(self):
         '''Grabbing a logger twice results in the same logger'''
@@ -112,6 +109,5 @@ class TestInit(ClearEnvTest):
         self.assertEqual(logger.handlers, stackify.getHandlers(logger))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()
-

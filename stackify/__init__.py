@@ -1,45 +1,24 @@
 """
 Stackify Python API
 """
-
+__all__ = ("VERSION")
 __version__ = '0.0.1'
-
-
-API_URL = 'https://api.stackify.com'
-
-READ_TIMEOUT = 5000
-
-MAX_BATCH = 100
-
-QUEUE_SIZE = 1000
 
 import logging
 import inspect
 import atexit
 
-DEFAULT_LEVEL = logging.ERROR
-
-LOGGING_LEVELS = {
-    logging.CRITICAL: 'CRITICAL',
-    logging.ERROR: 'ERROR',
-    logging.WARNING: 'WARNING',
-    logging.INFO: 'INFO',
-    logging.DEBUG: 'DEBUG',
-    logging.NOTSET: 'NOTSET'
-}
+from stackify.application import ApiConfiguration  # noqa
+from stackify.constants import DEFAULT_LEVEL
+from stackify.handler import StackifyHandler
 
 
 class NullHandler(logging.Handler):
     def emit(self, record):
         pass
 
+
 logging.getLogger(__name__).addHandler(NullHandler())
-
-
-from stackify.application import ApiConfiguration
-from stackify.http import HTTPClient
-
-from stackify.handler import StackifyHandler
 
 
 def getLogger(name=None, auto_shutdown=True, basic_config=True, **kwargs):
@@ -77,8 +56,6 @@ def getLogger(name=None, auto_shutdown=True, basic_config=True, **kwargs):
     if not [isinstance(x, StackifyHandler) for x in logger.handlers]:
         internal_logger = logging.getLogger(__name__)
         internal_logger.debug('Creating handler for logger %s', name)
-        handler = StackifyHandler(**kwargs)
-        logger.addHandler(handler)
 
         if auto_shutdown:
             internal_logger.debug('Registering atexit callback')
@@ -86,6 +63,9 @@ def getLogger(name=None, auto_shutdown=True, basic_config=True, **kwargs):
 
         if logger.getEffectiveLevel() == logging.NOTSET:
             logger.setLevel(DEFAULT_LEVEL)
+
+        handler = StackifyHandler(ensure_at_exit=not auto_shutdown, **kwargs)
+        logger.addHandler(handler)
 
         handler.listener.start()
 

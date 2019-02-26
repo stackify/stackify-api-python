@@ -2,14 +2,11 @@ import json
 import logging
 
 from stackify.formats import JSONObject
-
-from stackify import MAX_BATCH, LOGGING_LEVELS
 from stackify.error import StackifyError
 
 
 # this is used to separate builtin keys from user-specified keys
-RECORD_VARS = set(logging.LogRecord('', '', '', '',
-                                    '', '', '', '').__dict__.keys())
+RECORD_VARS = set(logging.LogRecord('', '', '', '', '', '', '', '').__dict__.keys())
 
 # the "message" attribute is saved on the record object by a Formatter
 RECORD_VARS.add('message')
