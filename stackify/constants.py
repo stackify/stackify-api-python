@@ -4,9 +4,8 @@ import logging
 API_URL = 'https://api.stackify.com'
 IDENTIFY_URL = '/Metrics/IdentifyApp'
 LOG_SAVE_URL = '/Log/Save'
-API_REQUEST_INTERVAL_IN_SEC = 5
+API_REQUEST_INTERVAL_IN_SEC = 30
 
-MIN_BATCH = 10
 MAX_BATCH = 100
 QUEUE_SIZE = 1000
 READ_TIMEOUT = 5000
