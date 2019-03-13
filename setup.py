@@ -17,10 +17,10 @@ with open('stackify/__init__.py') as f:
     version = ast.literal_eval(version_re.search(f).group(1))
 
 setup(
-    name='stackify',
+    name='stackify-api-python',
     version=version,
-    author='Matthew Thompson',
-    author_email='chameleonator@gmail.com',
+    author='Stackify',
+    author_email='support@stackify.com',
     packages=['stackify'],
     url='https://github.com/stackify/stackify-api-python',
     license=open('LICENSE.txt').readline(),
