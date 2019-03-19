@@ -1,5 +1,4 @@
 import traceback
-import time
 import sys
 
 from stackify.formats import JSONObject
@@ -37,31 +36,11 @@ class TraceFrame(JSONObject):
         self.Method = method
 
 
-class WebRequestDetail(JSONObject):
-    def __init__(self):
-        self.UserIPAddress = None
-        self.HttpMethod = None
-        self.RequestProtocol = None
-        self.RequestUrl = None
-        self.RequestUrlRoot = None
-        self.ReferralUrl = None
-        self.Headers = {}
-        self.Cookies = {}
-        self.QueryString = {}
-        self.PostData = {}
-        self.SessionData = {}
-        self.PostDataRaw = None
-        self.MVCAction = None
-        self.MVCController = None
-        self.MVCArea = None
-
-
 class StackifyError(JSONObject):
     def __init__(self):
         self.EnvironmentDetail = None  # environment detail object
         self.OccurredEpochMillis = None
         self.Error = None  # ErrorItem object
-        self.WebRequestDetail = None  # WebRequestDetail object
         self.CustomerName = None
         self.UserName = None
 

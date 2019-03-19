@@ -3,10 +3,10 @@ Test the stackify.formats module
 """
 
 import unittest
-from mock import patch, Mock
 import json
 
 from stackify.formats import JSONObject
+
 
 class TestJSONObject(unittest.TestCase):
     '''
@@ -51,6 +51,5 @@ class TestJSONObject(unittest.TestCase):
         self.assertEqual(json.loads(result), {'a': '1', 'b': False, 'd': []})
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()
-

@@ -1,5 +1,5 @@
 Stackify API for Python
-=======
+=======================
 
 [Stackify](https://stackify.com) support for Python programs.
 
@@ -35,9 +35,25 @@ export STACKIFY_API_KEY=******
 
 These options can also be provided in your code:
 ```python
+# Standard API
 import stackify
 
 logger = stackify.getLogger(application="MyApp", environment="Dev", api_key=******)
+logger.warning('Something happened')
+```
+
+```python
+# Python Logging Integration
+import logging
+import stackify
+
+# your existing logging
+logger = logging.getLogger()
+...
+
+stackify_handler = stackify.StackifyHandler(application="MyApp", environment="Dev", api_key=******)
+logger.addHandler(stackify_handler)
+
 logger.warning('Something happened')
 ```
 
@@ -48,10 +64,6 @@ When your program exits, it will shut the thread down and upload the remaining m
 
 Stackify can store extra data along with your log message:
 ```python
-import stackify
-
-logger = stackify.getLogger()
-
 try:
     user_string = raw_input("Enter a number: ")
     print("You entered", int(user_string))

@@ -1,10 +1,9 @@
 import logging
-import threading
-import os
+import atexit
 
 try:
     from logging.handlers import QueueHandler, QueueListener
-except:  # pragma: no cover
+except Exception:  # pragma: no cover
     from stackify.handler_backport import QueueHandler, QueueListener
 
 try:
@@ -12,11 +11,13 @@ try:
 except ImportError:  # pragma: no cover
     import queue
 
-from stackify import QUEUE_SIZE, API_URL, MAX_BATCH
-from stackify.log import LogMsg, LogMsgGroup
-from stackify.error import ErrorItem
-from stackify.http import HTTPClient
 from stackify.application import get_configuration
+from stackify.constants import API_REQUEST_INTERVAL_IN_SEC
+from stackify.constants import MAX_BATCH
+from stackify.constants import QUEUE_SIZE
+from stackify.http import HTTPClient
+from stackify.log import LogMsg, LogMsgGroup
+from stackify.timer import RepeatedTimer
 
 
 class StackifyHandler(QueueHandler):
@@ -25,10 +26,9 @@ class StackifyHandler(QueueHandler):
     transmission to Stackify servers.
     '''
 
-    def __init__(self, queue_=None, listener=None, **kwargs):
+    def __init__(self, queue_=None, listener=None, ensure_at_exit=True, **kwargs):
         if queue_ is None:
             queue_ = queue.Queue(QUEUE_SIZE)
-        logger = logging.getLogger(__name__)
 
         super(StackifyHandler, self).__init__(queue_)
 
@@ -36,6 +36,10 @@ class StackifyHandler(QueueHandler):
             listener = StackifyListener(queue_, **kwargs)
 
         self.listener = listener
+        self.listener.start()
+
+        if ensure_at_exit:
+            atexit.register(self.listener.stop)
 
     def enqueue(self, record):
         '''
@@ -45,8 +49,7 @@ class StackifyHandler(QueueHandler):
             self.queue.put_nowait(record)
         except queue.Full:
             logger = logging.getLogger(__name__)
-            logger.warn('StackifyHandler queue is full, '
-                        'evicting oldest record')
+            logger.warning('StackifyHandler queue is full, evicting oldest record')
             self.queue.get_nowait()
             self.queue.put_nowait(record)
 
@@ -65,6 +68,9 @@ class StackifyListener(QueueListener):
         self.max_batch = max_batch
         self.messages = []
         self.http = HTTPClient(config)
+        self.timer = RepeatedTimer(API_REQUEST_INTERVAL_IN_SEC, self.send_group)
+
+        self._started = False
 
     def handle(self, record):
         if not self.http.identified:
@@ -80,22 +86,36 @@ class StackifyListener(QueueListener):
             self.send_group()
 
     def send_group(self):
+        if not self.messages:
+            return
+
         group = LogMsgGroup(self.messages)
         try:
             self.http.send_log_group(group)
-        except:
+        except Exception:
             logger = logging.getLogger(__name__)
-            logger.exception('Could not send %s log messages, discarding',
-                             len(self.messages))
+            logger.exception('Could not send {} log messages, discarding'.format(len(self.messages)))
         del self.messages[:]
+
+    def start(self):
+        logger = logging.getLogger(__name__)
+        logger.debug('Starting up listener')
+
+        if not self._started:
+            super(StackifyListener, self).start()
+            self.timer.start()
+            self._started = True
 
     def stop(self):
         logger = logging.getLogger(__name__)
         logger.debug('Shutting down listener')
-        super(StackifyListener, self).stop()
+
+        if self._started:
+            super(StackifyListener, self).stop()
+            self.timer.stop()
+            self._started = False
 
         # send any remaining messages
         if self.messages:
-            logger.debug('%s messages left on shutdown, uploading',
-                         len(self.messages))
+            logger.debug('{} messages left on shutdown, uploading'.format(len(self.messages)))
             self.send_group()

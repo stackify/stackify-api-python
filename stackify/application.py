@@ -1,7 +1,7 @@
 import socket
 import os
 
-from stackify import API_URL
+from stackify.constants import API_URL
 from stackify.formats import JSONObject
 
 
@@ -32,8 +32,7 @@ def arg_or_env(name, args, default=None):
         if default:
             return default
         else:
-            raise NameError('You must specify the keyword argument {0} or '
-                            'environment variable {1}'.format(name, env_name))
+            raise NameError('You must specify the keyword argument {0} or environment variable {1}'.format(name, env_name))
 
 
 def get_configuration(**kwargs):

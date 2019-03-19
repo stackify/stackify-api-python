@@ -41,10 +41,11 @@ class TestListener(unittest.TestCase):
 
     def setUp(self):
         self.config = ApiConfiguration(
-            application = 'test_appname',
-            environment = 'test_environment',
-            api_key = 'test_apikey',
-            api_url = 'test_apiurl')
+            application='test_appname',
+            environment='test_environment',
+            api_key='test_apikey',
+            api_url='test_apiurl',
+        )
         # don't print warnings on http crashes, so mute stackify logger
         logging.getLogger('stackify').propagate = False
 
@@ -110,6 +111,5 @@ class TestListener(unittest.TestCase):
         self.assertEqual(send_log_group.call_count, 1)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()
-

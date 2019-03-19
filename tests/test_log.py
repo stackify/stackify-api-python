@@ -3,17 +3,12 @@ Test the stackify.log module
 """
 
 import unittest
-from mock import patch, Mock
 import json
 import sys
 
-import stackify.log
-
 from stackify.log import LogMsg
 import logging
-import json
 import time
-#logging.LogRecord('name','level','pathname','lineno','msg','args','exc_info','func')
 
 
 class TestLogPopulate(unittest.TestCase):
@@ -23,9 +18,8 @@ class TestLogPopulate(unittest.TestCase):
 
     def test_record_to_error(self):
         '''LogMsgs can load logger records'''
-        record = logging.LogRecord('name',logging.WARNING,'pathname',32,
-                'message %s',('here'),(),'func')
-        record.my_extra = [1,2,3]
+        record = logging.LogRecord('name', logging.WARNING, 'pathname', 32, 'message %s', ('here'), (), 'func')
+        record.my_extra = [1, 2, 3]
         msg = LogMsg()
         msg.from_record(record)
 
@@ -36,7 +30,7 @@ class TestLogPopulate(unittest.TestCase):
         self.assertEqual(msg.Th, 'MainThread')
         self.assertEqual(msg.Msg, 'message here')
         self.assertTrue(msg.EpochMs <= curr_ms)
-        self.assertEqual(json.loads(msg.data), {'my_extra':[1,2,3]})
+        self.assertEqual(json.loads(msg.data), {'my_extra': [1, 2, 3]})
 
     def test_record_exception(self):
         '''LogMsgs can parse exception information'''
@@ -46,9 +40,8 @@ class TestLogPopulate(unittest.TestCase):
 
         try:
             raise CustomException()
-        except:
-            record = logging.LogRecord('my exception',logging.WARNING,'somepath',12,
-                    'a thing happened',(),sys.exc_info())
+        except Exception:
+            record = logging.LogRecord('my exception', logging.WARNING, 'somepath', 12, 'a thing happened', (), sys.exc_info())
 
         msg = LogMsg()
         msg.from_record(record)
@@ -61,6 +54,5 @@ class TestLogPopulate(unittest.TestCase):
         self.assertEqual(msg.Ex.Error.SourceMethod, 'test_record_exception')
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()
-
