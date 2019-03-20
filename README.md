@@ -2,6 +2,10 @@ Stackify API for Python
 =======================
 
 ## Installation
+stackify-python can be installed through pip:
+```bash
+$ pip install -U stackify-api-python
+```
 
 **stackify-python-api** can be installed through pip:
 ```bash
