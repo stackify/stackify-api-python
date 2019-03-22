@@ -3,6 +3,9 @@ from setuptools import setup
 import re
 import ast
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 try:
     from pypandoc import convert
     read_md = lambda f: convert(f, 'rst')  # noqa
@@ -24,7 +27,8 @@ setup(
     packages=['stackify'],
     url='https://github.com/stackify/stackify-api-python',
     description='Stackify API for Python',
-    long_description=read_md('README.md'),
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     keywords=['logging', 'stackify', 'exception'],
     classifiers=["Programming Language :: Python"],
     install_requires=[
