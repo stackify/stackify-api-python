@@ -18,4 +18,4 @@ LOGGING_LEVELS = {
     logging.DEBUG: 'DEBUG',
     logging.NOTSET: 'NOTSET'
 }
-DEFAULT_LEVEL = logging.ERROR
+DEFAULT_LEVEL = logging.INFO

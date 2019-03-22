@@ -23,10 +23,8 @@ setup(
     author_email='support@stackify.com',
     packages=['stackify'],
     url='https://github.com/stackify/stackify-api-python',
-    license=open('LICENSE.txt').readline(),
     description='Stackify API for Python',
     long_description=read_md('README.md'),
-    download_url='https://github.com/stackify/stackify-api-python/tarball/0.0.1',
     keywords=['logging', 'stackify', 'exception'],
     classifiers=["Programming Language :: Python"],
     install_requires=[

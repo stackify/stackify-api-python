@@ -82,9 +82,9 @@ class HTTPClient:
 
     @retrying.retry(wait_exponential_multiplier=1000, stop_max_delay=10000)
     def send_log_group(self, group):
+        group.Env = self.environment_detail.configuredEnvironmentName
         group.CDID = self.device_id
         group.CDAppID = self.device_app_id
         group.AppNameID = self.app_name_id
-        group.ServerName = self.device_alias
         group.ServerName = group.ServerName or self.environment_detail.deviceName
         self.POST(LOG_SAVE_URL, group, True)
