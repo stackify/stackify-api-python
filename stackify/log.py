@@ -37,7 +37,7 @@ class LogMsg(JSONObject):
                 if k not in RECORD_VARS}
 
         if data:
-            self.data = json.dumps(data, default=lambda x: x.__dict__)
+            self.data = json.dumps(data, default=lambda x: hasattr(x, '__dict__') and x.__dict__ or x.__str__())
 
         if record.exc_info:
             self.Ex = StackifyError()
