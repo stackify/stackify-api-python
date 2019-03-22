@@ -79,3 +79,45 @@ import stackify
 
 logger = stackify.getLogger(basic_config=False)
 ```
+
+## Django Logging Integration
+
+You can also use your existing django logging and just append stackify logging handler
+
+```python
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+        },
+        'stackify': {
+            'level': 'DEBUG',
+            'class': 'stackify.StackifyHandler',
+            'application': 'MyApp',
+            'environment': 'Dev',
+            'api_key': '******',
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file', 'stackify'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+```
+
+Usage
+```python
+import logging
+
+logger = logging.getLogger('django')
+
+
+logger.warning('Something happened')
+```
