@@ -10,10 +10,13 @@ RECORD_VARS = set(logging.LogRecord('', '', '', '', '', '', '', '').__dict__.key
 
 # the "message" attribute is saved on the record object by a Formatter
 RECORD_VARS.add('message')
+RECORD_VARS.add('trans_id')
+RECORD_VARS.add('log_id')
 
 
 class LogMsg(JSONObject):
     def __init__(self):
+        self.ID = None
         self.Msg = None
         self.data = None
         self.Ex = None  # a StackifyError object
@@ -25,10 +28,12 @@ class LogMsg(JSONObject):
         self.SrcLine = None
 
     def from_record(self, record):
+        self.ID = hasattr(record, 'log_id') and record.log_id or None
         self.Msg = record.getMessage()
         self.Th = record.threadName or record.thread
         self.EpochMs = int(record.created * 1000)
         self.Level = record.levelname
+        self.TransID = hasattr(record, 'trans_id') and record.trans_id or None
         self.SrcMethod = record.funcName
         self.SrcLine = record.lineno
 

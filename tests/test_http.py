@@ -133,7 +133,6 @@ class TestClient(unittest.TestCase):
         self.assertEqual(group.CDID, client.device_id)
         self.assertEqual(group.CDAppID, client.device_app_id)
         self.assertEqual(group.AppNameID, client.app_name_id)
-        self.assertEqual(group.ServerName, client.device_alias)
 
     @patch('requests.post')
     def test_post_arguments(self, post):
