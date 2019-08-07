@@ -36,8 +36,8 @@ def arg_or_env(name, args, default=None):
 
 
 def get_configuration(**kwargs):
-        return ApiConfiguration(
-            application=arg_or_env('application', kwargs),
-            environment=arg_or_env('environment', kwargs),
-            api_key=arg_or_env('api_key', kwargs),
-            api_url=arg_or_env('api_url', kwargs, API_URL))
+    return ApiConfiguration(
+        application=arg_or_env('application', kwargs),
+        environment=arg_or_env('environment', kwargs),
+        api_key=arg_or_env('api_key', kwargs),
+        api_url=arg_or_env('api_url', kwargs, API_URL))

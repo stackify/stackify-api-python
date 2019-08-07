@@ -17,6 +17,9 @@ from stackify.constants import LOG_SAVE_URL
 from stackify.constants import READ_TIMEOUT
 
 
+internal_logger = logging.getLogger(__name__)
+
+
 def gzip_compress(data):
     if hasattr(gzip, 'compress'):
         return gzip.compress(bytes(data, 'utf-8'))  # python 3
@@ -41,8 +44,7 @@ class HTTPClient:
 
     def POST(self, url, json_object, use_gzip=False):
         request_url = self.api_config.api_url + url
-        logger = logging.getLogger(__name__)
-        logger.debug('Request URL: {}'.format(request_url))
+        internal_logger.debug('Request URL: {}'.format(request_url))
 
         headers = {
             'Content-Type': 'application/json',
@@ -52,7 +54,7 @@ class HTTPClient:
 
         try:
             payload_data = json_object.toJSON()
-            logger.debug('POST data: {}'.format(payload_data))
+            internal_logger.debug('POST data: {}'.format(payload_data))
 
             if use_gzip:
                 headers['Content-Encoding'] = 'gzip'
@@ -62,13 +64,13 @@ class HTTPClient:
                                      data=payload_data,
                                      headers=headers,
                                      timeout=READ_TIMEOUT)
-            logger.debug('Response: {}'.format(response.text))
+            internal_logger.debug('Response: {}'.format(response.text))
             return response.json()
         except requests.exceptions.RequestException:
-            logger.exception('HTTP exception')
+            internal_logger.exception('HTTP exception')
         except ValueError:
             # could not read json response
-            logger.exception('Cannot decode JSON response')
+            internal_logger.exception('Cannot decode JSON response')
 
     @retrying.retry(wait_exponential_multiplier=1000, stop_max_delay=10000)
     def identify_application(self):

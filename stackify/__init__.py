@@ -18,6 +18,8 @@ class NullHandler(logging.Handler):
 
 
 logging.getLogger(__name__).addHandler(NullHandler())
+internal_logger = logging.getLogger(__name__)
+internal_logger.setLevel(logging.DEBUG)
 
 
 def getLogger(name=None, auto_shutdown=True, basic_config=True, **kwargs):
@@ -52,8 +54,7 @@ def getLogger(name=None, auto_shutdown=True, basic_config=True, **kwargs):
 
     logger = logging.getLogger(name)
 
-    if not [isinstance(x, StackifyHandler) for x in logger.handlers]:
-        internal_logger = logging.getLogger(__name__)
+    if not any([isinstance(x, StackifyHandler) for x in logger.handlers]):
         internal_logger.debug('Creating handler for logger %s', name)
 
         if auto_shutdown:
@@ -66,8 +67,6 @@ def getLogger(name=None, auto_shutdown=True, basic_config=True, **kwargs):
         handler = StackifyHandler(ensure_at_exit=not auto_shutdown, **kwargs)
         logger.addHandler(handler)
 
-        handler.listener.start()
-
     return logger
 
 
@@ -77,7 +76,7 @@ def stopLogging(logger):
     Shut down the StackifyHandler on a given logger. This will block
     and wait for the queue to finish uploading.
     '''
-    internal_logger = logging.getLogger(__name__)
+
     internal_logger.debug('Shutting down all handlers')
     for handler in getHandlers(logger):
         handler.listener.stop()

@@ -20,6 +20,9 @@ from stackify.log import LogMsg, LogMsgGroup
 from stackify.timer import RepeatedTimer
 
 
+internal_logger = logging.getLogger(__name__)
+
+
 class StackifyHandler(QueueHandler):
     '''
     A handler class to format and queue log messages for later
@@ -39,6 +42,7 @@ class StackifyHandler(QueueHandler):
         self.listener.start()
 
         if ensure_at_exit:
+            internal_logger.debug('Registering atexit callback')
             atexit.register(self.listener.stop)
 
     def enqueue(self, record):
@@ -48,8 +52,7 @@ class StackifyHandler(QueueHandler):
         try:
             self.queue.put_nowait(record)
         except queue.Full:
-            logger = logging.getLogger(__name__)
-            logger.warning('StackifyHandler queue is full, evicting oldest record')
+            internal_logger.warning('StackifyHandler queue is full, evicting oldest record')
             self.queue.get_nowait()
             self.queue.put_nowait(record)
 
@@ -74,8 +77,7 @@ class StackifyListener(QueueListener):
 
     def handle(self, record):
         if not self.http.identified:
-            logger = logging.getLogger(__name__)
-            logger.debug('Identifying application')
+            internal_logger.debug('Identifying application')
             self.http.identify_application()
 
         msg = LogMsg()
@@ -93,13 +95,11 @@ class StackifyListener(QueueListener):
         try:
             self.http.send_log_group(group)
         except Exception:
-            logger = logging.getLogger(__name__)
-            logger.exception('Could not send {} log messages, discarding'.format(len(self.messages)))
+            internal_logger.exception('Could not send {} log messages, discarding'.format(len(self.messages)))
         del self.messages[:]
 
     def start(self):
-        logger = logging.getLogger(__name__)
-        logger.debug('Starting up listener')
+        internal_logger.debug('Starting up listener')
 
         if not self._started:
             super(StackifyListener, self).start()
@@ -107,8 +107,7 @@ class StackifyListener(QueueListener):
             self._started = True
 
     def stop(self):
-        logger = logging.getLogger(__name__)
-        logger.debug('Shutting down listener')
+        internal_logger.debug('Shutting down listener')
 
         if self._started:
             super(StackifyListener, self).stop()
@@ -117,5 +116,5 @@ class StackifyListener(QueueListener):
 
         # send any remaining messages
         if self.messages:
-            logger.debug('{} messages left on shutdown, uploading'.format(len(self.messages)))
+            internal_logger.debug('{} messages left on shutdown, uploading'.format(len(self.messages)))
             self.send_group()
