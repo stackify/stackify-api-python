@@ -17,10 +17,10 @@ class NullHandler(logging.Handler):
         pass
 
 
-logging.getLogger(__name__).addHandler(NullHandler())
-logging.getLogger(__name__).propagate = False
 internal_logger = logging.getLogger(__name__)
-internal_logger.setLevel(logging.DEBUG)
+internal_logger.addHandler(NullHandler())
+internal_logger.propagate = False
+internal_logger.setLevel(DEFAULT_LEVEL)
 
 
 def getLogger(name=None, auto_shutdown=True, basic_config=True, **kwargs):
