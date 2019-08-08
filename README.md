@@ -27,7 +27,7 @@ logger.warning('Something happened')
 ```python
 import logging
 import stackify
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 stackify_handler = stackify.StackifyHandler(application="Python Application", environment="Production", api_key="***")
 logger.addHandler(stackify_handler)
 logger.warning('Something happened')
@@ -120,4 +120,25 @@ logger = logging.getLogger('django')
 
 
 logger.warning('Something happened')
+```
+
+## NOTE
+When using python logging never use root logger.
+Using the root logger will dump all logs from your application and also from all of your imported packages.
+
+```
+logger = logging.basicConfig()
+```
+```
+logger = logging.getLogger()
+```
+
+You should at least name the logger so it will not use the root logger.
+```
+logger = logging.getLogger(__name__)
+```
+
+### Disable stackify internal loggings
+```
+logging.getLogger('stackify').propagate = False
 ```
