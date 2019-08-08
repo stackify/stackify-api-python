@@ -18,6 +18,7 @@ class NullHandler(logging.Handler):
 
 
 logging.getLogger(__name__).addHandler(NullHandler())
+logging.getLogger(__name__).propagate = False
 internal_logger = logging.getLogger(__name__)
 internal_logger.setLevel(logging.DEBUG)
 
