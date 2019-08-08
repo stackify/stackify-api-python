@@ -68,7 +68,9 @@ This library has an internal logger it uses for debugging and messaging.
 For example, if you want to enable debug messages:
 ```python
 import logging
-logging.getLogger('stackify').setLevel(logging.DEBUG)
+logger = logging.getLogger('stackify')
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.FileHandler('stackify.log'))  # or any handler you want
 ```
 
 By default, it will enable the default logging settings via `logging.basicConfig()`
@@ -120,25 +122,4 @@ logger = logging.getLogger('django')
 
 
 logger.warning('Something happened')
-```
-
-## NOTE
-When using python logging never use root logger.
-Using the root logger will dump all logs from your application and also from all of your imported packages.
-
-```
-logger = logging.basicConfig()
-```
-```
-logger = logging.getLogger()
-```
-
-You should at least name the logger so it will not use the root logger.
-```
-logger = logging.getLogger(__name__)
-```
-
-### Disable stackify internal loggings
-```
-logging.getLogger('stackify').propagate = False
 ```
