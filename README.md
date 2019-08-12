@@ -27,7 +27,7 @@ logger.warning('Something happened')
 ```python
 import logging
 import stackify
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 stackify_handler = stackify.StackifyHandler(application="Python Application", environment="Production", api_key="***")
 logger.addHandler(stackify_handler)
 logger.warning('Something happened')
@@ -68,7 +68,9 @@ This library has an internal logger it uses for debugging and messaging.
 For example, if you want to enable debug messages:
 ```python
 import logging
-logging.getLogger('stackify').setLevel(logging.DEBUG)
+logger = logging.getLogger('stackify')
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.FileHandler('stackify.log'))  # or any handler you want
 ```
 
 By default, it will enable the default logging settings via `logging.basicConfig()`
