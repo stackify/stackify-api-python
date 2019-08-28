@@ -5,7 +5,7 @@ Test the stackify.formats module
 import unittest
 import json
 
-from stackify.formats import JSONObject
+from stackify.transport.default.formats import JSONObject
 
 
 class TestJSONObject(unittest.TestCase):

@@ -11,13 +11,11 @@ try:
 except ImportError:  # pragma: no cover
     import queue
 
-from stackify.application import get_configuration
 from stackify.constants import API_REQUEST_INTERVAL_IN_SEC
 from stackify.constants import MAX_BATCH
 from stackify.constants import QUEUE_SIZE
-from stackify.http import HTTPClient
-from stackify.log import LogMsg, LogMsgGroup
 from stackify.timer import RepeatedTimer
+from stackify.transport import Transport
 
 
 internal_logger = logging.getLogger(__name__)
@@ -65,24 +63,15 @@ class StackifyListener(QueueListener):
     def __init__(self, queue_, max_batch=MAX_BATCH, config=None, **kwargs):
         super(StackifyListener, self).__init__(queue_)
 
-        if config is None:
-            config = get_configuration(**kwargs)
-
         self.max_batch = max_batch
         self.messages = []
-        self.http = HTTPClient(config)
+        self.transport = Transport(config, **kwargs)
         self.timer = RepeatedTimer(API_REQUEST_INTERVAL_IN_SEC, self.send_group)
 
         self._started = False
 
     def handle(self, record):
-        if not self.http.identified:
-            internal_logger.debug('Identifying application')
-            self.http.identify_application()
-
-        msg = LogMsg()
-        msg.from_record(record)
-        self.messages.append(msg)
+        self.messages.append(self.transport.create_message(record))
 
         if len(self.messages) >= self.max_batch:
             self.send_group()
@@ -91,9 +80,9 @@ class StackifyListener(QueueListener):
         if not self.messages:
             return
 
-        group = LogMsgGroup(self.messages)
+        group_message = self.transport.create_group_message(self.messages)
         try:
-            self.http.send_log_group(group)
+            self.transport.send(group_message)
         except Exception:
             internal_logger.exception('Could not send {} log messages, discarding'.format(len(self.messages)))
         del self.messages[:]
@@ -103,8 +92,8 @@ class StackifyListener(QueueListener):
 
         if not self._started:
             super(StackifyListener, self).start()
-            self.timer.start()
             self._started = True
+            self.timer.start()
 
     def stop(self):
         internal_logger.debug('Shutting down listener')

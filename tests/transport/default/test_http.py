@@ -7,11 +7,12 @@ from mock import patch, Mock
 import imp
 
 import retrying
-import stackify.http
+import stackify.transport.default.http
 
-from stackify.log import LogMsgGroup
-from stackify.application import ApiConfiguration
+from stackify.transport.default.log import LogMsgGroup
+from stackify.transport.application import ApiConfiguration
 from stackify.constants import READ_TIMEOUT
+from stackify.transport.application import EnvironmentDetail
 
 old_retry = retrying.retry
 
@@ -36,12 +37,12 @@ class TestClient(unittest.TestCase):
     def setUpClass(cls):
         cls.FAKE_RETRIES = 3
         retrying.retry = fake_retry_decorator(cls.FAKE_RETRIES)
-        imp.reload(stackify.http)
+        imp.reload(stackify.transport.default.http)
 
     @classmethod
     def tearDownClass(cls):
         imp.reload(retrying)
-        imp.reload(stackify.http)
+        imp.reload(stackify.transport.default.http)
 
     def setUp(self):
         self.config = ApiConfiguration(
@@ -50,13 +51,14 @@ class TestClient(unittest.TestCase):
             api_key='test_apikey',
             api_url='test_apiurl',
         )
+        self.env_details = EnvironmentDetail(self.config)
 
-        self.client = stackify.http.HTTPClient(self.config)
+        self.client = stackify.transport.default.http.HTTPClient(self.config, self.env_details)
 
     def test_logger_no_config(self):
         '''GZIP encoder works'''
         correct = list(b'\x1f\x8b\x08\x00\x00\x00\x00\x00\x02\xff\xf3H\xcd\xc9\xc9\xd7Q(\xcf/\xcaIQ\x04\x00\xe6\xc6\xe6\xeb\r\x00\x00\x00')
-        gzipped = list(stackify.http.gzip_compress('Hello, world!'))
+        gzipped = list(stackify.transport.default.http.gzip_compress('Hello, world!'))
         gzipped[4:8] = b'\x00\x00\x00\x00'  # blank the mtime
         self.assertEqual(gzipped, correct)
 
@@ -111,7 +113,7 @@ class TestClient(unittest.TestCase):
 
         with patch.object(client, 'POST', crash):
             with self.assertRaises(CustomException):
-                client.send_log_group(group)
+                client.send_log_group('url', group)
         self.assertEqual(crash.call_count, self.FAKE_RETRIES)
 
     def test_send_log_group(self):
@@ -127,7 +129,7 @@ class TestClient(unittest.TestCase):
         group = LogMsgGroup([])
 
         with patch.object(client, 'POST') as post:
-            client.send_log_group(group)
+            client.send_log_group('url', group)
             self.assertTrue(post.called)
 
         self.assertEqual(group.CDID, client.device_id)
@@ -162,7 +164,7 @@ class TestClient(unittest.TestCase):
         payload.toJSON = Mock(return_value='1')
         gzip = Mock(side_effect=lambda x: x + '_gzipped')
 
-        with patch.object(stackify.http, 'gzip_compress', gzip):
+        with patch.object(stackify.transport.default.http, 'gzip_compress', gzip):
             client.POST('url', payload, use_gzip=True)
 
         self.assertTrue(post.called)

@@ -11,9 +11,7 @@ except Exception:
     except Exception:
         pass  # python 3, we use a new function in gzip
 
-from stackify.application import EnvironmentDetail
 from stackify.constants import IDENTIFY_URL
-from stackify.constants import LOG_SAVE_URL
 from stackify.constants import READ_TIMEOUT
 
 
@@ -32,9 +30,9 @@ def gzip_compress(data):
 
 
 class HTTPClient:
-    def __init__(self, api_config):
+    def __init__(self, api_config, env_detail):
         self.api_config = api_config
-        self.environment_detail = EnvironmentDetail(api_config)
+        self.environment_detail = env_detail
         self.app_name_id = None
         self.app_env_id = None
         self.device_id = None
@@ -74,6 +72,7 @@ class HTTPClient:
 
     @retrying.retry(wait_exponential_multiplier=1000, stop_max_delay=10000)
     def identify_application(self):
+        internal_logger.debug('Identifying application')
         result = self.POST(IDENTIFY_URL, self.environment_detail)
         self.app_name_id = result.get('AppNameID')
         self.app_env_id = result.get('AppEnvID')
@@ -83,10 +82,17 @@ class HTTPClient:
         self.identified = True
 
     @retrying.retry(wait_exponential_multiplier=1000, stop_max_delay=10000)
-    def send_log_group(self, group):
+    def send_log_group(self, url, group):
+        internal_logger.debug('Sending logs by group')
         group.Env = self.environment_detail.configuredEnvironmentName
         group.CDID = self.device_id
         group.CDAppID = self.device_app_id
         group.AppNameID = self.app_name_id
         group.ServerName = group.ServerName or self.environment_detail.deviceName
-        self.POST(LOG_SAVE_URL, group, True)
+        self.POST(url, group, True)
+
+    def send(self, url, group):
+        if not self.identified:
+            self.identify_application()
+
+        self.send_log_group(url, group)

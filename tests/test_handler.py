@@ -11,7 +11,7 @@ except ImportError:
     import queue
 
 from stackify.handler import StackifyHandler, StackifyListener
-from stackify.application import ApiConfiguration
+from stackify.transport.application import ApiConfiguration
 
 import logging
 
@@ -49,22 +49,22 @@ class TestListener(unittest.TestCase):
         # don't print warnings on http crashes, so mute stackify logger
         logging.getLogger('stackify').propagate = False
 
-    @patch('stackify.handler.LogMsg')
-    @patch('stackify.handler.StackifyListener.send_group')
-    @patch('stackify.handler.HTTPClient.POST')
-    def test_not_identified(self, post, send_group, logmsg):
+    @patch('stackify.transport.Transport.create_message')
+    @patch('stackify.transport.default.http.HTTPClient.POST')
+    def test_not_identified(self, post, logmsg):
         '''The HTTPClient identifies automatically if needed'''
         listener = StackifyListener(queue_=Mock(), config=self.config)
         listener.handle(Mock())
-        self.assertTrue(listener.http.identified)
+        listener.send_group()
+        self.assertTrue(listener.transport._transport.identified)
 
-    @patch('stackify.handler.LogMsg')
-    @patch('stackify.handler.LogMsgGroup')
-    @patch('stackify.handler.HTTPClient.POST')
+    @patch('stackify.transport.Transport.create_message')
+    @patch('stackify.transport.Transport.create_group_message')
+    @patch('stackify.transport.default.http.HTTPClient.POST')
     def test_send_group_if_needed(self, post, logmsggroup, logmsg):
         '''The listener sends groups of messages'''
         listener = StackifyListener(queue_=Mock(), max_batch=3, config=self.config)
-        listener.http.identified = True
+        listener.transport._transport.identified = True
 
         listener.handle(1)
         self.assertFalse(post.called)
@@ -78,12 +78,12 @@ class TestListener(unittest.TestCase):
         self.assertEqual(post.call_count, 1)
         self.assertEqual(len(listener.messages), 1)
 
-    @patch('stackify.handler.LogMsg')
+    @patch('stackify.transport.Transport.create_message')
     @patch('stackify.handler.StackifyListener.send_group')
     def test_clear_queue_shutdown(self, send_group, logmsg):
         '''The listener sends the leftover messages on the queue when shutting down'''
         listener = StackifyListener(queue_=Mock(), max_batch=3, config=self.config)
-        listener.http.identified = True
+        listener.transport._transport.identified = True
         listener._thread = Mock()
 
         listener.handle(1)
@@ -92,13 +92,13 @@ class TestListener(unittest.TestCase):
         listener.stop()
         self.assertTrue(send_group.called)
 
-    @patch('stackify.handler.LogMsg')
-    @patch('stackify.handler.LogMsgGroup')
-    @patch('stackify.handler.HTTPClient.send_log_group')
+    @patch('stackify.transport.Transport.create_message')
+    @patch('stackify.transport.Transport.create_group_message')
+    @patch('stackify.transport.default.http.HTTPClient.send_log_group')
     def test_send_group_crash(self, send_log_group, logmsggroup, logmsg):
         '''The listener drops messages after retrying'''
         listener = StackifyListener(queue_=Mock(), max_batch=3, config=self.config)
-        listener.http.identified = True
+        listener.transport._transport.identified = True
 
         send_log_group.side_effect = Exception
 

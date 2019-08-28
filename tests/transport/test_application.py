@@ -4,10 +4,10 @@ Test the stackify.application module
 
 import unittest
 from mock import patch
-from .bases import ClearEnvTest
+from tests.bases import ClearEnvTest
 
 from stackify.constants import API_URL
-from stackify.application import get_configuration
+from stackify.transport.application import get_configuration
 
 
 class TestConfig(ClearEnvTest):
@@ -89,6 +89,35 @@ class TestConfig(ClearEnvTest):
         self.assertEqual(config.environment, 'test4_environment')
         self.assertEqual(config.api_key, 'test4_apikey')
         self.assertEqual(config.api_url, API_URL)
+
+    def test_transport_default(self):
+        config = get_configuration(
+            application='test4_appname',
+            environment='test4_environment',
+            api_key='test4_apikey',
+            api_url='test3_apiurl',
+        )
+
+        self.assertEqual(config.application, 'test4_appname')
+        self.assertEqual(config.environment, 'test4_environment')
+        self.assertEqual(config.api_key, 'test4_apikey')
+        self.assertEqual(config.api_url, 'test3_apiurl')
+        self.assertEqual(config.transport, 'default')
+
+    def test_transport_given(self):
+        config = get_configuration(
+            application='test5_appname',
+            environment='test5_environment',
+            api_key='test5_apikey',
+            api_url='test5_apiurl',
+            transport='test5_transport'
+        )
+
+        self.assertEqual(config.application, 'test5_appname')
+        self.assertEqual(config.environment, 'test5_environment')
+        self.assertEqual(config.api_key, 'test5_apikey')
+        self.assertEqual(config.api_url, 'test5_apiurl')
+        self.assertEqual(config.transport, 'test5_transport')
 
 
 if __name__ == '__main__':

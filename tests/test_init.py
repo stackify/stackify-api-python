@@ -17,7 +17,7 @@ class TestInit(ClearEnvTest):
 
     def setUp(self):
         super(TestInit, self).setUp()
-        self.config = stackify.ApiConfiguration(
+        self.config = stackify.transport.application.ApiConfiguration(
             application='test_appname',
             environment='test_environment',
             api_key='test_apikey',
@@ -43,7 +43,7 @@ class TestInit(ClearEnvTest):
             logger = stackify.getLogger(auto_shutdown=False)
             self.loggers.append(logger)
 
-        config = logger.handlers[0].listener.http.api_config
+        config = logger.handlers[0].listener.transport.api_config
 
         self.assertEqual(config.application, 'test2_appname')
         self.assertEqual(config.environment, 'test2_environment')
@@ -55,7 +55,7 @@ class TestInit(ClearEnvTest):
         logger = stackify.getLogger(config=self.config, auto_shutdown=False)
         self.loggers.append(logger)
 
-        config = logger.handlers[0].listener.http.api_config
+        config = logger.handlers[0].listener.transport.api_config
 
         self.assertEqual(config.application, 'test_appname')
         self.assertEqual(config.environment, 'test_environment')
@@ -79,7 +79,7 @@ class TestInit(ClearEnvTest):
             self.loggers.append(logger)
 
         handler = logger.handlers[0]
-        config = handler.listener.http.api_config
+        config = handler.listener.transport.api_config
 
         self.assertEqual(logger.name, 'tests.test_init')
         self.assertEqual(config.api_url, stackify.constants.API_URL)
