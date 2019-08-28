@@ -38,7 +38,9 @@ class TransportTypes(object):
         if type == self.AGENT_SOCKET:
             return Log(record, api_config, env_details).get_object()
 
-        return LogMsg().from_record(record)
+        msg = LogMsg()
+        msg.from_record(record)
+        return msg
 
     @classmethod
     def create_group_message(self, messages, type, api_config, env_details):
