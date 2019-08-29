@@ -13,19 +13,7 @@ from stackify.transport.default.log import LogMsgGroup
 from stackify.transport.application import ApiConfiguration
 from stackify.constants import READ_TIMEOUT
 from stackify.transport.application import EnvironmentDetail
-
-old_retry = retrying.retry
-
-
-def fake_retry_decorator(retries):
-    def fake_retry(*args, **kwargs):
-        kwargs['wait_exponential_max'] = 0  # no delay between retries
-        kwargs['stop_max_attempt_number'] = retries
-
-        def inner(func):
-            return old_retry(*args, **kwargs)(func)
-        return inner
-    return fake_retry
+from tests.bases import fake_retry_decorator
 
 
 class TestClient(unittest.TestCase):

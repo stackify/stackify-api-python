@@ -1,5 +1,9 @@
 import os
+import retrying
 import unittest
+
+
+old_retry = retrying.retry
 
 
 class ClearEnvTest(unittest.TestCase):
@@ -28,3 +32,14 @@ class ClearEnvTest(unittest.TestCase):
         for key, item in self.saved.items():
             os.environ[key] = item
         del self.saved
+
+
+def fake_retry_decorator(retries):
+    def fake_retry(*args, **kwargs):
+        kwargs['wait_exponential_max'] = 0  # no delay between retries
+        kwargs['stop_max_attempt_number'] = retries
+
+        def inner(func):
+            return old_retry(*args, **kwargs)(func)
+        return inner
+    return fake_retry

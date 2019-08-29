@@ -1,4 +1,5 @@
 import logging
+import os
 import retrying
 import requests_unixsocket
 
@@ -15,7 +16,7 @@ class AgentSocket(object):
 
     def post(self, url, payload):
         if not url.startswith(self.SOCKET_SCHEME):
-            url = self.SOCKET_LOG_FILE + url
+            url = os.path.join(self.SOCKET_LOG_FILE, url.lstrip('/'))
 
         internal_logger.debug('Request URL: {}'.format(url))
         internal_logger.debug('POST data: {}'.format(payload))
@@ -29,7 +30,8 @@ class AgentSocket(object):
             internal_logger.debug('Response: {}'.format(response.text))
             return response
         except Exception:
-            internal_logger.exception('HTTP UNIX Socket domain exception')
+            internal_logger.debug('HTTP UNIX Socket domain exception')
+            raise
 
     def get(self, url):
         raise NotImplementedError

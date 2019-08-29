@@ -14,13 +14,13 @@ class BaseMessage(object):
 
 
 class EnvironmentDetail(BaseMessage):
-    def __init__(self, api_config, env_details):
+    def __init__(self, api_config, environment_details):
         self.obj = env_details = stackify_agent_pb2.LogGroup.Log.Error.EnvironmentDetail()
         env_details.application_name = api_config.application
         env_details.configured_application_name = api_config.application
         env_details.configured_environment_name = api_config.environment
-        env_details.device_name = env_details.deviceName
-        env_details.application_location = env_details.appLocation
+        env_details.device_name = environment_details.deviceName
+        env_details.application_location = environment_details.appLocation
 
 
 class TraceFrame(BaseMessage):
@@ -44,23 +44,18 @@ class ErrorItem(BaseMessage):
 
         error_item.message = str(value)
         error_item.error_type = type_.__name__
-        error_item.error_type_code = None
         error_item.source_method = stacks[-1][2]
-        error_item.data = None
-        error_item.error_item = None
 
         for filename, lineno, method, text in reversed(stacks):
-            error_item.stacktrace.add(TraceFrame(filename, lineno, method).get_object())
+            error_item.stacktrace.append(TraceFrame(filename, lineno, method).get_object())
 
 
 class Error(BaseMessage):
     def __init__(self, record, api_config, env_details):
         self.obj = error = stackify_agent_pb2.LogGroup.Log.Error()
-        error.error_item = ErrorItem(record.exc_info).get_object()
         error.date_millis = int(record.created * 1000)
-        error.customer_name = None
-        error.username = None
-        error.environment_detail = EnvironmentDetail(api_config).get_object()
+        error.error_item.MergeFrom(ErrorItem(record.exc_info).get_object())
+        error.environment_detail.MergeFrom(EnvironmentDetail(api_config, env_details).get_object())
 
 
 class Log(BaseMessage):
@@ -86,7 +81,7 @@ class Log(BaseMessage):
             log.data = json.dumps(data, default=lambda x: hasattr(x, '__dict__') and x.__dict__ or x.__str__())
 
         if record.exc_info:
-            log.error = Error(record, api_config).get_object()
+            log.error.MergeFrom(Error(record, api_config, env_details).get_object())
 
 
 class LogGroup(BaseMessage):
