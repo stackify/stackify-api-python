@@ -12,9 +12,6 @@ class BaseMessage(object):
     def get_object(self):
         return self.obj
 
-    def serialize_to_string(self):
-        return self.obj and self.obj.SerializeToString()
-
 
 class EnvironmentDetail(BaseMessage):
     def __init__(self, api_config, env_details):
@@ -69,14 +66,18 @@ class Error(BaseMessage):
 class Log(BaseMessage):
     def __init__(self, record, api_config, env_details):
         self.obj = log = stackify_agent_pb2.LogGroup.Log()
-        log.id = hasattr(record, 'log_id') and record.log_id or None
         log.message = record.getMessage()
         log.thread_name = record.threadName or record.thread
         log.date_millis = int(record.created * 1000)
         log.level = record.levelname
-        log.transaction_id = hasattr(record, 'trans_id') and record.trans_id or None
         log.source_method = record.funcName
         log.source_line = record.lineno
+
+        if hasattr(record, 'log_id'):
+            log.id = record.log_id
+
+        if hasattr(record, 'trans_id'):
+            log.transaction_id = record.trans_id
 
         data = {k: v for k, v in record.__dict__.items()
                 if k not in RECORD_VARS}

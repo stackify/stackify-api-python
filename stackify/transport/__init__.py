@@ -4,7 +4,6 @@ import sys
 import urllib
 
 from stackify.constants import DEFAULT_SOCKET_FILE
-from stackify.constants import SOCKET_URL
 from stackify.constants import SOCKET_LOG_URL
 from stackify.constants import LOG_SAVE_URL
 from stackify.transport.agent import AgentSocket
@@ -62,16 +61,23 @@ class TransportTypes(object):
     @classmethod
     def create_group_message(self, messages, api_config, env_details):
         if api_config.transport == self.AGENT_SOCKET:
-            return LogGroup(messages, api_config, env_details).serialize_to_string()
+            return LogGroup(messages, api_config, env_details).get_object()
 
         return LogMsgGroup(messages)
 
     @classmethod
     def get_log_url(self, api_config):
         if api_config.transport == self.AGENT_SOCKET:
-            return SOCKET_URL + SOCKET_LOG_URL
+            return api_config.socket_url + SOCKET_LOG_URL
 
         return LOG_SAVE_URL
+
+    @classmethod
+    def prepare_message(self, api_config, message):
+        if api_config.transport == self.AGENT_SOCKET:
+            return message.SerializeToString()
+
+        return message
 
 
 class Transport(object):
@@ -104,5 +110,5 @@ class Transport(object):
     def send(self, group_message):
         self._transport.send(
             TransportTypes.get_log_url(self.api_config),
-            group_message,
+            TransportTypes.prepare_message(self.api_config, group_message),
         )
