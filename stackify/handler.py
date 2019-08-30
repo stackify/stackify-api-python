@@ -1,3 +1,4 @@
+import copy
 import logging
 import atexit
 
@@ -53,6 +54,10 @@ class StackifyHandler(QueueHandler):
             internal_logger.warning('StackifyHandler queue is full, evicting oldest record')
             self.queue.get_nowait()
             self.queue.put_nowait(record)
+
+    def prepare(self, record):
+        record = copy.copy(record)
+        return record
 
 
 class StackifyListener(QueueListener):
