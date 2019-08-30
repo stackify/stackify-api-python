@@ -108,7 +108,10 @@ class Transport(object):
         )
 
     def send(self, group_message):
-        self._transport.send(
-            TransportTypes.get_log_url(self.api_config),
-            TransportTypes.prepare_message(self.api_config, group_message),
-        )
+        try:
+            self._transport.send(
+                TransportTypes.get_log_url(self.api_config),
+                TransportTypes.prepare_message(self.api_config, group_message),
+            )
+        except Exception as e:
+            internal_logger.error('Request error: {}'.format(e))

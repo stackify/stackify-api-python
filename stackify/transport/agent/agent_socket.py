@@ -27,10 +27,10 @@ class AgentSocket(object):
 
         try:
             response = self._session.post(url, payload, headers=headers)
-            internal_logger.debug('Response: {}'.format(response.text))
+            internal_logger.debug('Response status: {}'.format(response.status_code))
             return response
-        except Exception:
-            internal_logger.debug('HTTP UNIX Socket domain exception')
+        except Exception as e:
+            internal_logger.debug('HTTP UNIX Socket domain exception: {}.'.format(e))
             raise
 
     def get(self, url):
