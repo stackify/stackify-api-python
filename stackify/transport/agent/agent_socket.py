@@ -14,7 +14,7 @@ class AgentSocket(object):
     def __init__(self):
         self._session = requests_unixsocket.Session()
 
-    def post(self, url, payload):
+    def _post(self, url, payload):
         if not url.startswith(self.SOCKET_SCHEME):
             url = os.path.join(self.SOCKET_LOG_FILE, url.lstrip('/'))
 
@@ -33,18 +33,6 @@ class AgentSocket(object):
             internal_logger.debug('HTTP UNIX Socket domain exception: {}.'.format(e))
             raise
 
-    def get(self, url):
-        raise NotImplementedError
-
-    def put(self, url, payload):
-        raise NotImplementedError
-
-    def patch(self, url, payload):
-        raise NotImplementedError
-
-    def delete(self, url, id):
-        raise NotImplementedError
-
     @retrying.retry(wait_exponential_multiplier=1000, stop_max_delay=10000)
     def send(self, url, payload):
-        self.post(url, payload)
+        self._post(url, payload)
