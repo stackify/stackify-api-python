@@ -119,6 +119,31 @@ class TestConfig(ClearEnvTest):
         self.assertEqual(config.api_url, 'test5_apiurl')
         self.assertEqual(config.transport, 'test5_transport')
 
+    def test_api_key_is_required_on_default_transport(self):
+        with self.assertRaises(NameError):
+            get_configuration(
+                application='test_appname',
+                environment='test_environment',
+                api_key='',
+                api_url='test_apiurl',
+                transport='default'
+            )
+
+    def test_api_key_is_not_required_on_agent_socket_transport(self):
+        config = get_configuration(
+            application='test_appname',
+            environment='test_environment',
+            api_key='',
+            api_url='test_apiurl',
+            transport='agent_socket'
+        )
+
+        self.assertEqual(config.application, 'test_appname')
+        self.assertEqual(config.environment, 'test_environment')
+        self.assertEqual(config.api_key, '')
+        self.assertEqual(config.api_url, 'test_apiurl')
+        self.assertEqual(config.transport, 'agent_socket')
+
 
 if __name__ == '__main__':
     unittest.main()

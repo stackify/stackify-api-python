@@ -4,6 +4,8 @@ import os
 from stackify.utils import arg_or_env
 from stackify.constants import API_URL
 from stackify.constants import SOCKET_URL
+from stackify.constants import TRANSPORT_TYPE_AGENT_SOCKET
+from stackify.constants import TRANSPORT_TYPE_DEFAULT
 from stackify.transport.default.formats import JSONObject
 
 
@@ -26,11 +28,17 @@ class ApiConfiguration:
 
 
 def get_configuration(**kwargs):
+    transport = arg_or_env('transport', kwargs, TRANSPORT_TYPE_DEFAULT)
+    if transport == TRANSPORT_TYPE_AGENT_SOCKET:
+        api_key = arg_or_env('api_key', kwargs, '')
+    else:
+        api_key = arg_or_env('api_key', kwargs)
+
     return ApiConfiguration(
         application=arg_or_env('application', kwargs),
         environment=arg_or_env('environment', kwargs),
-        api_key=arg_or_env('api_key', kwargs),
+        api_key=api_key,
         api_url=arg_or_env('api_url', kwargs, API_URL),
         socket_url=arg_or_env('socket_url', kwargs, SOCKET_URL),
-        transport=arg_or_env('transport', kwargs, 'default'),
+        transport=transport,
     )

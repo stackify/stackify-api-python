@@ -32,3 +32,6 @@ RECORD_VARS = set(logging.LogRecord('', '', '', '', '', '', '', '').__dict__.key
 RECORD_VARS.add('message')
 RECORD_VARS.add('trans_id')
 RECORD_VARS.add('log_id')
+
+TRANSPORT_TYPE_DEFAULT = 'default'
+TRANSPORT_TYPE_AGENT_SOCKET = 'agent_socket'

@@ -4,8 +4,10 @@ import sys
 import urllib
 
 from stackify.constants import DEFAULT_SOCKET_FILE
-from stackify.constants import SOCKET_LOG_URL
 from stackify.constants import LOG_SAVE_URL
+from stackify.constants import SOCKET_LOG_URL
+from stackify.constants import TRANSPORT_TYPE_AGENT_SOCKET
+from stackify.constants import TRANSPORT_TYPE_DEFAULT
 from stackify.transport.agent import AgentSocket
 from stackify.transport.agent.message import Log
 from stackify.transport.agent.message import LogGroup
@@ -30,8 +32,8 @@ class TransportTypes(object):
     * AGENT_SOCKET - HTTP warapped Unix Socket Domain that will send logs to the StackifyAgent
     """
 
-    DEFAULT = 'default'
-    AGENT_SOCKET = 'agent_socket'
+    DEFAULT = TRANSPORT_TYPE_DEFAULT
+    AGENT_SOCKET = TRANSPORT_TYPE_AGENT_SOCKET
 
     @classmethod
     def get_transport(self, api_config=None, env_details=None):
