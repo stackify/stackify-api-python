@@ -70,7 +70,7 @@ class HTTPClient:
             # could not read json response
             internal_logger.exception('Cannot decode JSON response')
 
-    @retrying.retry(wait_exponential_multiplier=1000, stop_max_delay=10000)
+    @retrying.retry(wait_exponential_multiplier=1000, stop_max_delay=32000)
     def identify_application(self):
         internal_logger.debug('Identifying application')
         result = self.POST(IDENTIFY_URL, self.environment_detail)
@@ -81,7 +81,7 @@ class HTTPClient:
         self.device_alias = result.get('DeviceAlias')
         self.identified = True
 
-    @retrying.retry(wait_exponential_multiplier=1000, stop_max_delay=10000)
+    @retrying.retry(wait_exponential_multiplier=1000, stop_max_delay=32000)
     def send_log_group(self, url, group):
         internal_logger.debug('Sending logs by group')
         group.Env = self.environment_detail.configuredEnvironmentName

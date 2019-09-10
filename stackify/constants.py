@@ -5,6 +5,7 @@ API_URL = 'https://api.stackify.com'
 IDENTIFY_URL = '/Metrics/IdentifyApp'
 LOG_SAVE_URL = '/Log/Save'
 
+# using `%2F` instead of `/` as per package documentation
 DEFAULT_SOCKET_FILE = '%2Fusr%2Flocal%2Fstackify%2Fstackify.sock'
 SOCKET_URL = 'http+unix://' + DEFAULT_SOCKET_FILE
 SOCKET_LOG_URL = '/log'

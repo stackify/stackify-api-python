@@ -39,7 +39,7 @@ class AgentSocket(object):
             internal_logger.debug('HTTP UNIX Socket domain exception: {}.'.format(e))
             raise
 
-    @retrying.retry(wait_exponential_multiplier=1000, stop_max_delay=10000)
+    @retrying.retry(wait_exponential_multiplier=1000, stop_max_delay=32000)
     def send(self, url, payload):
         # send payload through socket domain using _post method
         self._post(url, payload)
