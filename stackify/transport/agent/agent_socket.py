@@ -8,6 +8,10 @@ internal_logger = logging.getLogger(__name__)
 
 
 class AgentSocket(object):
+    """
+    AgentSocket class that will post message through unix socket domain
+    """
+
     SOCKET_LOG_FILE = 'http+unix://%2Fusr%2Flocal%2Fstackify%2Fstackify.sock'
     SOCKET_SCHEME = 'http+unix://'
 
@@ -15,6 +19,8 @@ class AgentSocket(object):
         self._session = requests_unixsocket.Session()
 
     def _post(self, url, payload):
+        # will use stackify default domain socket if url is not given
+        # or not using http+unix://
         if not url.startswith(self.SOCKET_SCHEME):
             url = os.path.join(self.SOCKET_LOG_FILE, url.lstrip('/'))
 
