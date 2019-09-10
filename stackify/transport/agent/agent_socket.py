@@ -41,4 +41,5 @@ class AgentSocket(object):
 
     @retrying.retry(wait_exponential_multiplier=1000, stop_max_delay=10000)
     def send(self, url, payload):
+        # send payload through socket domain using _post method
         self._post(url, payload)

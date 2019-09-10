@@ -31,6 +31,7 @@ class TransportTypes(object):
 
     @classmethod
     def get_transport(self, api_config=None, env_details=None):
+        # determine which transport to use depening on users config
         if api_config.transport == self.AGENT_SOCKET:
             internal_logger.debug('Setting Agent Socket Transport.')
             api_config.transport = self.AGENT_SOCKET
@@ -42,6 +43,7 @@ class TransportTypes(object):
 
     @classmethod
     def create_message(self, record, api_config, env_details):
+        # create message depending on which transport
         if api_config.transport == self.AGENT_SOCKET:
             return Log(record, api_config, env_details).get_object()
 
@@ -51,6 +53,7 @@ class TransportTypes(object):
 
     @classmethod
     def create_group_message(self, messages, api_config, env_details):
+        # create group message depending on which transport
         if api_config.transport == self.AGENT_SOCKET:
             return LogGroup(messages, api_config, env_details).get_object()
 
@@ -58,6 +61,7 @@ class TransportTypes(object):
 
     @classmethod
     def get_log_url(self, api_config):
+        # return log url depending on which transport
         if api_config.transport == self.AGENT_SOCKET:
             return api_config.socket_url + SOCKET_LOG_URL
 
@@ -65,6 +69,7 @@ class TransportTypes(object):
 
     @classmethod
     def prepare_message(self, api_config, message):
+        # convert message depending on which transport
         if api_config.transport == self.AGENT_SOCKET:
             return message.SerializeToString()
 
@@ -85,6 +90,7 @@ class Transport(object):
         )
 
     def create_message(self, record):
+        # create message from record
         return TransportTypes.create_message(
             record,
             self.api_config,
@@ -92,6 +98,7 @@ class Transport(object):
         )
 
     def create_group_message(self, messages):
+        # create group message from list of records
         return TransportTypes.create_group_message(
             messages,
             self.api_config,
@@ -99,6 +106,7 @@ class Transport(object):
         )
 
     def send(self, group_message):
+        # send group message
         try:
             self._transport.send(
                 TransportTypes.get_log_url(self.api_config),

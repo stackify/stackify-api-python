@@ -14,6 +14,7 @@ class BaseMessage(object):
     obj = None
 
     def get_object(self):
+        # return protobuf object
         return self.obj
 
 
