@@ -32,8 +32,10 @@ setup(
     keywords=['logging', 'stackify', 'exception'],
     classifiers=["Programming Language :: Python"],
     install_requires=[
+        'protobuf>=3.9.1',
         'retrying>=1.2.3',
-        'requests>=2.4.1'
+        'requests>=2.4.1',
+        'requests-unixsocket>=0.2.0'
     ],
     test_suite='tests',
     tests_requires=[

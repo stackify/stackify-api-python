@@ -7,7 +7,6 @@ import logging
 import inspect
 import atexit
 
-from stackify.application import ApiConfiguration  # noqa
 from stackify.constants import DEFAULT_LEVEL
 from stackify.handler import StackifyHandler
 

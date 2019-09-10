@@ -6,7 +6,7 @@ import unittest
 import json
 import sys
 
-from stackify.log import LogMsg
+from stackify.transport.default.log import LogMsg
 import logging
 import time
 

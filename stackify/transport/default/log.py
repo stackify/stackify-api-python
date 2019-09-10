@@ -1,17 +1,8 @@
 import json
-import logging
 
-from stackify.formats import JSONObject
-from stackify.error import StackifyError
-
-
-# this is used to separate builtin keys from user-specified keys
-RECORD_VARS = set(logging.LogRecord('', '', '', '', '', '', '', '').__dict__.keys())
-
-# the "message" attribute is saved on the record object by a Formatter
-RECORD_VARS.add('message')
-RECORD_VARS.add('trans_id')
-RECORD_VARS.add('log_id')
+from stackify.constants import RECORD_VARS
+from stackify.transport.default.formats import JSONObject
+from stackify.transport.default.error import StackifyError
 
 
 class LogMsg(JSONObject):

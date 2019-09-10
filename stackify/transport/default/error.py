@@ -1,7 +1,7 @@
 import traceback
 import sys
 
-from stackify.formats import JSONObject
+from stackify.transport.default.formats import JSONObject
 
 
 class ErrorItem(JSONObject):
