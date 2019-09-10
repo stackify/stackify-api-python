@@ -10,6 +10,11 @@ from stackify.transport.default.formats import JSONObject
 
 
 class EnvironmentDetail(JSONObject):
+    """
+    EnvironmentDetail class that stores application environment
+    and user define details
+    """
+
     def __init__(self, api_config):
         self.deviceName = socket.gethostname()
         self.appLocation = os.getcwd()
@@ -18,6 +23,10 @@ class EnvironmentDetail(JSONObject):
 
 
 class ApiConfiguration:
+    """
+    ApiConfiguration class that stores application configurations
+    """
+
     def __init__(self, api_key, application, environment, api_url=API_URL, socket_url=SOCKET_URL, transport=None):
         self.api_key = api_key
         self.api_url = api_url
@@ -28,6 +37,11 @@ class ApiConfiguration:
 
 
 def get_configuration(**kwargs):
+    """
+    return application configuration depending on users input,
+    application environment and application config
+    """
+
     transport = arg_or_env('transport', kwargs, TRANSPORT_TYPE_DEFAULT)
     if transport == TRANSPORT_TYPE_AGENT_SOCKET:
         api_key = arg_or_env('api_key', kwargs, '')

@@ -7,6 +7,10 @@ from stackify.protos import stackify_agent_pb2
 
 
 class BaseMessage(object):
+    """
+    Base Class wrapper for protobuf classes
+    This will help to create protobuf object with ease
+    """
     obj = None
 
     def get_object(self):
@@ -14,6 +18,10 @@ class BaseMessage(object):
 
 
 class EnvironmentDetail(BaseMessage):
+    """
+    Class wrapper for protobuf LogGroup.Log.Error.EnvironmentDetail class
+    """
+
     def __init__(self, api_config, environment_details):
         self.obj = env_details = stackify_agent_pb2.LogGroup.Log.Error.EnvironmentDetail()
         env_details.application_name = api_config.application
@@ -24,6 +32,10 @@ class EnvironmentDetail(BaseMessage):
 
 
 class TraceFrame(BaseMessage):
+    """
+    Class wrapper for protobuf LogGroup.Log.Error.ErrorItem.TraceFrame class
+    """
+
     def __init__(self, filename, lineno, method):
         self.obj = trace_frame = stackify_agent_pb2.LogGroup.Log.Error.ErrorItem.TraceFrame()
         trace_frame.code_filename = filename
@@ -32,6 +44,10 @@ class TraceFrame(BaseMessage):
 
 
 class ErrorItem(BaseMessage):
+    """
+    Class wrapper for protobuf LogGroup.Log.Error.ErrorItem.TraceFrame class
+    """
+
     def __init__(self, exc_info):
         self.obj = error_item = stackify_agent_pb2.LogGroup.Log.Error.ErrorItem()
 
@@ -51,6 +67,10 @@ class ErrorItem(BaseMessage):
 
 
 class Error(BaseMessage):
+    """
+    Class wrapper for protobuf LogGroup.Log.Error class
+    """
+
     def __init__(self, record, api_config, env_details):
         self.obj = error = stackify_agent_pb2.LogGroup.Log.Error()
         error.date_millis = int(record.created * 1000)
@@ -59,6 +79,10 @@ class Error(BaseMessage):
 
 
 class Log(BaseMessage):
+    """
+    Class wrapper for protobuf LogGroup.Log class
+    """
+
     def __init__(self, record, api_config, env_details):
         self.obj = log = stackify_agent_pb2.LogGroup.Log()
         log.message = record.getMessage()
@@ -85,6 +109,10 @@ class Log(BaseMessage):
 
 
 class LogGroup(BaseMessage):
+    """
+    Class wrapper for protobuf LogGroup class
+    """
+
     def __init__(self, messages, api_config, env_details, logger=None):
         self.obj = log_group = stackify_agent_pb2.LogGroup()
         log_group.environment = api_config.environment

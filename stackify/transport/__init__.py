@@ -1,9 +1,5 @@
 import logging
-import os
-import sys
-import urllib
 
-from stackify.constants import DEFAULT_SOCKET_FILE
 from stackify.constants import LOG_SAVE_URL
 from stackify.constants import SOCKET_LOG_URL
 from stackify.constants import TRANSPORT_TYPE_AGENT_SOCKET
@@ -16,8 +12,6 @@ from stackify.transport.application import EnvironmentDetail
 from stackify.transport.default import HTTPClient
 from stackify.transport.default.log import LogMsg
 from stackify.transport.default.log import LogMsgGroup
-
-PY2 = sys.version_info[0] == 2
 
 internal_logger = logging.getLogger(__name__)
 
@@ -38,14 +32,9 @@ class TransportTypes(object):
     @classmethod
     def get_transport(self, api_config=None, env_details=None):
         if api_config.transport == self.AGENT_SOCKET:
-            socket_url = urllib.unquote_plus(DEFAULT_SOCKET_FILE) if PY2 else urllib.parse.unquote_plus(DEFAULT_SOCKET_FILE)
-            # checking if socket file exists
-            if os.path.exists(socket_url):
-                internal_logger.debug('Setting Agent Socket Transport.')
-                api_config.transport = self.AGENT_SOCKET
-                return AgentSocket()
-            else:
-                internal_logger.debug('Socket file not found.')
+            internal_logger.debug('Setting Agent Socket Transport.')
+            api_config.transport = self.AGENT_SOCKET
+            return AgentSocket()
 
         internal_logger.debug('Setting Default Transport.')
         api_config.transport = self.DEFAULT
