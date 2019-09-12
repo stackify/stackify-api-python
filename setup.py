@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from setuptools import setup
+import setuptools
 import re
 import ast
 
@@ -19,12 +19,12 @@ with open('stackify/__init__.py') as f:
     f = f.read()
     version = ast.literal_eval(version_re.search(f).group(1))
 
-setup(
+setuptools.setup(
     name='stackify-api-python',
     version=version,
     author='Stackify',
     author_email='support@stackify.com',
-    packages=['stackify'],
+    packages=setuptools.find_packages(exclude=("tests", "*tests", "tests*",)),
     url='https://github.com/stackify/stackify-api-python',
     description='Stackify API for Python',
     long_description=long_description,
