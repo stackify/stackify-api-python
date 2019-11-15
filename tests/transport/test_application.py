@@ -3,10 +3,15 @@ Test the stackify.application module
 """
 
 import unittest
+import os
 from mock import patch
 from tests.bases import ClearEnvTest
 
 from stackify.constants import API_URL
+from stackify.constants import DEFAULT_HTTP_ENDPOINT
+from stackify.constants import TRANSPORT_TYPE_AGENT_HTTP
+from stackify.constants import TRANSPORT_TYPE_AGENT_SOCKET
+from stackify.constants import TRANSPORT_TYPE_DEFAULT
 from stackify.transport.application import get_configuration
 
 
@@ -143,6 +148,74 @@ class TestConfig(ClearEnvTest):
         self.assertEqual(config.api_key, '')
         self.assertEqual(config.api_url, 'test_apiurl')
         self.assertEqual(config.transport, 'agent_socket')
+
+
+class ConfigEnvironmentVariableTest(ClearEnvTest):
+    def test_transport_environment_variable_default(self):
+        os.environ["STACKIFY_TRANSPORT"] = "default"
+
+        config = get_configuration(
+            application='test_appname',
+            environment='test_environment',
+            api_key='test_apikey',
+            api_url='test_apiurl',
+        )
+
+        assert config.transport == TRANSPORT_TYPE_DEFAULT
+
+        del os.environ["STACKIFY_TRANSPORT"]
+
+    def test_transport_environment_variable_agent_socket(self):
+        os.environ["STACKIFY_TRANSPORT"] = "agent_socket"
+
+        config = get_configuration(
+            application='test_appname',
+            environment='test_environment',
+            api_key='test_apikey',
+            api_url='test_apiurl',
+        )
+
+        assert config.transport == TRANSPORT_TYPE_AGENT_SOCKET
+
+        del os.environ["STACKIFY_TRANSPORT"]
+
+    def test_transport_environment_variable_agent_http(self):
+        os.environ["STACKIFY_TRANSPORT"] = "agent_http"
+
+        config = get_configuration(
+            application='test_appname',
+            environment='test_environment',
+            api_key='test_apikey',
+            api_url='test_apiurl',
+        )
+
+        assert config.transport == TRANSPORT_TYPE_AGENT_HTTP
+
+        del os.environ["STACKIFY_TRANSPORT"]
+
+    def test_http_endpoint_environment_variable_default(self):
+        config = get_configuration(
+            application='test_appname',
+            environment='test_environment',
+            api_key='test_apikey',
+            api_url='test_apiurl',
+        )
+
+        assert config.http_endpoint == DEFAULT_HTTP_ENDPOINT
+
+    def test_http_endpoint_environment_variable(self):
+        os.environ["STACKIFY_TRANSPORT_HTTP_ENDPOINT"] = "test"
+
+        config = get_configuration(
+            application='test_appname',
+            environment='test_environment',
+            api_key='test_apikey',
+            api_url='test_apiurl',
+        )
+
+        assert config.http_endpoint == "test"
+
+        del os.environ["STACKIFY_TRANSPORT_HTTP_ENDPOINT"]
 
 
 if __name__ == '__main__':

@@ -3,9 +3,9 @@ from mock import patch
 
 from tests.bases import ClearEnvTest
 from stackify.protos import stackify_agent_pb2
-from stackify.transport import Transport
-from stackify.transport.agent import AgentSocket
-from stackify.transport.default import HTTPClient
+from stackify.transport import configure_transport
+from stackify.transport.agent import AgentSocketTransport
+from stackify.transport.default import DefaultSocketTransport
 from stackify.transport.default.log import LogMsg
 from stackify.transport.default.log import LogMsgGroup
 
@@ -20,9 +20,9 @@ class TestTransport(ClearEnvTest):
             'transport': 'invalid',
         }
 
-        transport = Transport(**config)
+        transport = configure_transport(**config)
 
-        assert isinstance(transport._transport, HTTPClient)
+        assert isinstance(transport, DefaultSocketTransport)
 
     def test_default_transport(self):
         config = {
@@ -32,9 +32,9 @@ class TestTransport(ClearEnvTest):
             'api_url': 'test_apiurl',
         }
 
-        transport = Transport(**config)
+        transport = configure_transport(**config)
 
-        assert isinstance(transport._transport, HTTPClient)
+        assert isinstance(transport, DefaultSocketTransport)
 
     def test_default_create_message(self):
         config = {
@@ -44,7 +44,7 @@ class TestTransport(ClearEnvTest):
             'api_url': 'test_apiurl',
         }
 
-        transport = Transport(**config)
+        transport = configure_transport(**config)
         message = transport.create_message(logging.makeLogRecord({'mgs': 'message'}))
 
         assert isinstance(message, LogMsg)
@@ -57,7 +57,7 @@ class TestTransport(ClearEnvTest):
             'api_url': 'test_apiurl',
         }
 
-        transport = Transport(**config)
+        transport = configure_transport(**config)
         message = transport.create_message(logging.makeLogRecord({'mgs': 'message'}))
         group_message = transport.create_group_message([message])
 
@@ -72,7 +72,7 @@ class TestTransport(ClearEnvTest):
             'api_url': 'test_apiurl',
         }
 
-        transport = Transport(**config)
+        transport = configure_transport(**config)
         message = transport.create_message(logging.makeLogRecord({'mgs': 'message'}))
         group_message = transport.create_group_message([message])
         transport.send(group_message)
@@ -90,9 +90,9 @@ class TestTransport(ClearEnvTest):
             'transport': 'agent_socket',
         }
 
-        transport = Transport(**config)
+        transport = configure_transport(**config)
 
-        assert isinstance(transport._transport, AgentSocket)
+        assert isinstance(transport, AgentSocketTransport)
 
     def test_agent_socket_create_message(self):
         config = {
@@ -104,10 +104,10 @@ class TestTransport(ClearEnvTest):
             'transport': 'agent_socket',
         }
 
-        transport = Transport(**config)
+        transport = configure_transport(**config)
         message = transport.create_message(logging.makeLogRecord({'mgs': 'message', 'funcName': 'foo'}))
 
-        isinstance(message, stackify_agent_pb2.LogGroup.Log)
+        assert isinstance(message, stackify_agent_pb2.LogGroup.Log)
 
     def test_agent_socket_create_group_message(self):
         config = {
@@ -119,7 +119,7 @@ class TestTransport(ClearEnvTest):
             'transport': 'agent_socket',
         }
 
-        transport = Transport(**config)
+        transport = configure_transport(**config)
         message = transport.create_message(logging.makeLogRecord({'mgs': 'message', 'funcName': 'foo'}))
         group_message = transport.create_group_message([message])
 
@@ -136,7 +136,7 @@ class TestTransport(ClearEnvTest):
             'transport': 'agent_socket',
         }
 
-        transport = Transport(**config)
+        transport = configure_transport(**config)
         message = transport.create_message(logging.makeLogRecord({'mgs': 'message', 'funcName': 'foo'}))
         group_message = transport.create_group_message([message])
         transport.send(group_message)
@@ -154,7 +154,7 @@ class TestTransport(ClearEnvTest):
             'transport': 'agent_socket',
         }
 
-        transport = Transport(**config)
+        transport = configure_transport(**config)
         message = transport.create_message(logging.makeLogRecord({'mgs': 'message', 'funcName': 'foo'}))
         group_message = transport.create_group_message([message])
         transport.send(group_message)

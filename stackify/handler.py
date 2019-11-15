@@ -16,7 +16,7 @@ from stackify.constants import API_REQUEST_INTERVAL_IN_SEC
 from stackify.constants import MAX_BATCH
 from stackify.constants import QUEUE_SIZE
 from stackify.timer import RepeatedTimer
-from stackify.transport import Transport
+from stackify.transport import configure_transport
 
 
 internal_logger = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ class StackifyListener(QueueListener):
 
         self.max_batch = max_batch
         self.messages = []
-        self.transport = Transport(config, **kwargs)
+        self.transport = configure_transport(config, **kwargs)
         self.timer = RepeatedTimer(API_REQUEST_INTERVAL_IN_SEC, self.send_group)
 
         self._started = False

@@ -20,6 +20,7 @@ class ClearEnvTest(unittest.TestCase):
             'STACKIFY_API_KEY',
             'STACKIFY_API_URL',
             'STACKIFY_TRANSPORT',
+            'STACKIFY_TRANSPORT_HTTP_ENDPOINT',
         ]
         self.saved = {}
         for key in to_save:
