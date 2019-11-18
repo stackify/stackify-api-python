@@ -1,11 +1,15 @@
+import imp
 import logging
+import retrying
 from unittest import TestCase
 from mock import patch
 
+import stackify
 from stackify.protos import stackify_agent_pb2
 from stackify.transport import application
 from stackify.transport.agent import AgentHTTPTransport
 from stackify.transport.agent import AgentSocketTransport
+from tests.bases import fake_retry_decorator
 
 
 class AgentSocketTransportTest(TestCase):
@@ -48,6 +52,15 @@ class AgentSocketTransportTest(TestCase):
 
 
 class AgentHTTPTransportTest(TestCase):
+    @classmethod
+    def setUpClass(self):
+        retrying.retry = fake_retry_decorator(3)
+        imp.reload(stackify.transport.agent.agent_http)
+
+    @classmethod
+    def tearDownClass(self):
+        imp.reload(retrying)
+        imp.reload(stackify.transport.agent.agent_http)
 
     def setUp(self):
         self.config = application.ApiConfiguration(
@@ -85,3 +98,14 @@ class AgentHTTPTransportTest(TestCase):
         assert mock_post.called
         assert mock_post.call_args_list[0][0][0] == 'https://localhost:10601/log'
         assert mock_post.call_args_list[0][1]['headers']['Content-Type'] == 'application/x-protobuf'
+
+    @patch('requests.post')
+    def test_retry(self, mock_post):
+        mock_post.side_effect = Exception('some error')
+        message = self.agent_http_transport.create_message(logging.makeLogRecord({'mgs': 'message', 'funcName': 'foo'}))
+        group_message = self.agent_http_transport.create_group_message([message])
+
+        with self.assertRaises(Exception):
+            self.agent_http_transport.send(group_message)
+
+        assert mock_post.call_count == 3

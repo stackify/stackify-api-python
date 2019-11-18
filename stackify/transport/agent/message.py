@@ -122,4 +122,4 @@ class LogGroup(BaseMessage):
         log_group.application_location = env_details.appLocation
         log_group.logger = logger or __name__
         log_group.platform = 'python'
-        log_group.logs.MergeFrom(messages)
+        log_group.logs.extend(messages)

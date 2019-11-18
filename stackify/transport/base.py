@@ -24,6 +24,9 @@ class AgentBaseTransport(BaseTransport):
     """
     Base Transport for protobuf data
     """
+    url = None
+    _transport = None
+
     def __init__(self, api_config, env_details):
         super(AgentBaseTransport, self).__init__(api_config, env_details)
 
@@ -34,4 +37,4 @@ class AgentBaseTransport(BaseTransport):
         return LogGroup(messages, self._api_config, self._env_details).get_object()
 
     def send(self, group_message):
-        raise NotImplementedError
+        return self._transport.send(self.url, group_message.SerializeToString())

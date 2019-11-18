@@ -27,10 +27,12 @@ class RepeatedTimer(object):
 
     def start(self):
         if not self._started:
+            self._started = True
             self.thread.setDaemon(True)
             self.thread.start()
 
     def stop(self):
         if self._started:
+            self._started = False
             self.event.set()
             self.thread.join()

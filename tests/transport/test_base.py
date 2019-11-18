@@ -81,4 +81,4 @@ class AgentBaseTransportTest(ClearEnvTest):
         env_details = 'test_env_details'
         agent_base_transport = AgentBaseTransport(api_config, env_details)
 
-        self.assertRaises(NotImplementedError, agent_base_transport.send, 'test_group_message')
+        self.assertRaises(AttributeError, agent_base_transport.send, 'test_group_message')
