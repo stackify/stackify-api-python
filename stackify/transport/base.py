@@ -3,6 +3,9 @@ from stackify.transport.agent.message import LogGroup
 
 
 class BaseTransport(object):
+    """
+    Base Transport
+    """
     def __init__(self, api_config, env_details):
         self._api_config = api_config
         self._env_details = env_details
@@ -18,6 +21,9 @@ class BaseTransport(object):
 
 
 class AgentBaseTransport(BaseTransport):
+    """
+    Base Transport for protobuf data
+    """
     def __init__(self, api_config, env_details):
         super(AgentBaseTransport, self).__init__(api_config, env_details)
 

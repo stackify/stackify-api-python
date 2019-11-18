@@ -5,11 +5,14 @@ from stackify.transport.default.log import LogMsg
 from stackify.transport.default.log import LogMsgGroup
 
 
-class DefaultSocketTransport(BaseTransport):
+class DefaultTransport(BaseTransport):
+    """
+    Default Transport handles sending of logs directly to platform
+    """
     _transport = None
 
     def __init__(self, api_config, env_details):
-        super(DefaultSocketTransport, self).__init__(api_config, env_details)
+        super(DefaultTransport, self).__init__(api_config, env_details)
         self._transport = HTTPClient(api_config, env_details)
 
     def create_message(self, record):

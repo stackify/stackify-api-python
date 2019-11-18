@@ -5,7 +5,7 @@ from tests.bases import ClearEnvTest
 from stackify.protos import stackify_agent_pb2
 from stackify.transport import configure_transport
 from stackify.transport.agent import AgentSocketTransport
-from stackify.transport.default import DefaultSocketTransport
+from stackify.transport.default import DefaultTransport
 from stackify.transport.default.log import LogMsg
 from stackify.transport.default.log import LogMsgGroup
 
@@ -22,7 +22,7 @@ class TestTransport(ClearEnvTest):
 
         transport = configure_transport(**config)
 
-        assert isinstance(transport, DefaultSocketTransport)
+        assert isinstance(transport, DefaultTransport)
 
     def test_default_transport(self):
         config = {
@@ -34,7 +34,7 @@ class TestTransport(ClearEnvTest):
 
         transport = configure_transport(**config)
 
-        assert isinstance(transport, DefaultSocketTransport)
+        assert isinstance(transport, DefaultTransport)
 
     def test_default_create_message(self):
         config = {

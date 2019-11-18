@@ -7,7 +7,7 @@ from stackify.transport.agent import AgentSocketTransport
 from stackify.transport.agent import AgentHTTPTransport
 from stackify.transport.application import get_configuration
 from stackify.transport.application import EnvironmentDetail
-from stackify.transport.default import DefaultSocketTransport
+from stackify.transport.default import DefaultTransport
 
 
 internal_logger = logging.getLogger(__name__)
@@ -21,6 +21,7 @@ class TransportTypes(object):
     Types:
     * DEFAULT - HTTP transport that will directly send logs to the Platform
     * AGENT_SOCKET - HTTP warapped Unix Socket Domain that will send logs to the StackifyAgent
+    * AGENT_HTTP - HTTP transport that will send logs to the Agent using HTTP requests
     """
 
     DEFAULT = TRANSPORT_TYPE_DEFAULT
@@ -40,10 +41,11 @@ class TransportTypes(object):
 
         internal_logger.debug('Setting Default Transport.')
         api_config.transport = self.DEFAULT
-        return DefaultSocketTransport(api_config, env_details)
+        return DefaultTransport(api_config, env_details)
 
 
 def configure_transport(config=None, **kwargs):
+    # return which transport to use depending on users input
     api_config = config or get_configuration(**kwargs)
     env_details = EnvironmentDetail(api_config)
     return TransportTypes.get_transport(

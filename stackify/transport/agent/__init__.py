@@ -10,6 +10,9 @@ internal_logger = logging.getLogger(__name__)
 
 
 class AgentSocketTransport(AgentBaseTransport):
+    """
+    Agent Socket Transport handles sending of logs using Unix Socket Domain
+    """
     _transport = None
 
     def __init__(self, api_config, env_details):
@@ -24,6 +27,10 @@ class AgentSocketTransport(AgentBaseTransport):
 
 
 class AgentHTTPTransport(AgentBaseTransport):
+    """
+    Agent HTTP Transport handles sending of logs using HTTP requests
+    """
+
     def __init__(self, api_config, env_details):
         super(AgentHTTPTransport, self).__init__(api_config, env_details)
 

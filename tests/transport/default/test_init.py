@@ -3,7 +3,7 @@ from unittest import TestCase
 from mock import patch
 
 from stackify.transport import application
-from stackify.transport.default import DefaultSocketTransport
+from stackify.transport.default import DefaultTransport
 from stackify.transport.default.log import LogMsg
 from stackify.transport.default.log import LogMsgGroup
 
@@ -17,7 +17,7 @@ class AgentSocketTransportTest(TestCase):
             api_url='test_apiurl',
         )
         self.env_details = application.EnvironmentDetail(self.config)
-        self.default_transport = DefaultSocketTransport(self.config, self.env_details)
+        self.default_transport = DefaultTransport(self.config, self.env_details)
 
     def test_init(self):
         assert self.default_transport._api_config == self.config
