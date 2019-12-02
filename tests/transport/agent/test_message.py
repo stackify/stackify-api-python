@@ -1,10 +1,15 @@
 import logging
-from unittest import TestCase
+import sys
 
 from stackify.protos import stackify_agent_pb2
 from stackify.transport import application
 from stackify.transport.agent.message import Log
 from stackify.transport.agent.message import LogGroup
+
+if sys.version_info[0] == 2:
+    from tests.bases import LogTestCase as TestCase
+else:
+    from unittest import TestCase
 
 
 class TestLog(TestCase):
@@ -24,6 +29,18 @@ class TestLog(TestCase):
             log = Log(logging_watcher.records[0], self.config, self.env_details).get_object()
 
             assert isinstance(log, stackify_agent_pb2.LogGroup.Log)
+
+    def test_get_object_with_trans_id_and_log_id(self):
+        with self.assertLogs('foo', level='INFO') as logging_watcher:
+            logging.getLogger('foo').info('some log')
+            record = logging_watcher.records[0]
+            record.trans_id = 'trans_id'
+            record.log_id = 'log_id'
+
+            log = Log(record, self.config, self.env_details).get_object()
+
+            assert log.id == 'log_id'
+            assert log.transaction_id == 'trans_id'
 
     def test_info_log_details(self):
         with self.assertLogs('foo', level='INFO') as logging_watcher:
@@ -83,7 +100,7 @@ class TestLog(TestCase):
             assert environment_detail.application_location == self.env_details.appLocation
 
             error_item = error.error_item
-            assert error_item.message == 'division by zero'
+            assert error_item.message in ['integer division or modulo by zero', 'division by zero']
             assert error_item.error_type == 'ZeroDivisionError'
             assert error_item.source_method == 'test_info_exception_details'
             assert len(error_item.stacktrace)

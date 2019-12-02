@@ -1,8 +1,8 @@
 import os
 
 
-def arg_or_env(name, args, default=None):
-    env_name = 'STACKIFY_{0}'.format(name.upper())
+def arg_or_env(name, args, default=None, env_key=None):
+    env_name = env_key or 'STACKIFY_{0}'.format(name.upper())
     try:
         value = args.get(name)
         if not value:

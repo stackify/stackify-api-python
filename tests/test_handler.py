@@ -49,7 +49,7 @@ class TestListener(unittest.TestCase):
         # don't print warnings on http crashes, so mute stackify logger
         logging.getLogger('stackify').propagate = False
 
-    @patch('stackify.transport.Transport.create_message')
+    @patch('stackify.transport.default.DefaultTransport.create_message')
     @patch('stackify.transport.default.http.HTTPClient.POST')
     def test_not_identified(self, post, logmsg):
         '''The HTTPClient identifies automatically if needed'''
@@ -58,8 +58,8 @@ class TestListener(unittest.TestCase):
         listener.send_group()
         self.assertTrue(listener.transport._transport.identified)
 
-    @patch('stackify.transport.Transport.create_message')
-    @patch('stackify.transport.Transport.create_group_message')
+    @patch('stackify.transport.default.DefaultTransport.create_message')
+    @patch('stackify.transport.default.DefaultTransport.create_group_message')
     @patch('stackify.transport.default.http.HTTPClient.POST')
     def test_send_group_if_needed(self, post, logmsggroup, logmsg):
         '''The listener sends groups of messages'''
@@ -78,7 +78,7 @@ class TestListener(unittest.TestCase):
         self.assertEqual(post.call_count, 1)
         self.assertEqual(len(listener.messages), 1)
 
-    @patch('stackify.transport.Transport.create_message')
+    @patch('stackify.transport.default.DefaultTransport.create_message')
     @patch('stackify.handler.StackifyListener.send_group')
     def test_clear_queue_shutdown(self, send_group, logmsg):
         '''The listener sends the leftover messages on the queue when shutting down'''
@@ -92,8 +92,8 @@ class TestListener(unittest.TestCase):
         listener.stop()
         self.assertTrue(send_group.called)
 
-    @patch('stackify.transport.Transport.create_message')
-    @patch('stackify.transport.Transport.create_group_message')
+    @patch('stackify.transport.default.DefaultTransport.create_message')
+    @patch('stackify.transport.default.DefaultTransport.create_group_message')
     @patch('stackify.transport.default.http.HTTPClient.send_log_group')
     def test_send_group_crash(self, send_log_group, logmsggroup, logmsg):
         '''The listener drops messages after retrying'''
