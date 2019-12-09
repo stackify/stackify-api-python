@@ -15,7 +15,7 @@ class AgentHTTP(object):
             'Content-Type': 'application/x-protobuf',
         }
         try:
-            return requests.post(url, payload, headers=headers)
+            return requests.post(url, payload, headers=headers, verify=False)
         except Exception as e:
             internal_logger.debug('HTTP transport exception: {}.'.format(e))
             raise
