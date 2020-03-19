@@ -84,6 +84,7 @@ class HTTPClient:
     @retrying.retry(wait_exponential_multiplier=1000, stop_max_delay=32000)
     def send_log_group(self, url, group):
         internal_logger.debug('Sending logs by group')
+        group.AppName = self.environment_detail.configuredAppName
         group.Env = self.environment_detail.configuredEnvironmentName
         group.CDID = self.device_id
         group.CDAppID = self.device_app_id

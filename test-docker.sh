@@ -2,6 +2,9 @@
 
 set -e
 
+# remove caches
+find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
+
 VERSIONS=('2.7' '3.4' '3.5' '3.6' '3.7' '3.8')
 # VERSIONS=('2.7')
 
