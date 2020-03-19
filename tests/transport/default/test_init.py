@@ -71,7 +71,7 @@ class AgentSocketTransportTest(TestCase):
             'AppName': 'test_appname',
             'AppEnvID': 'test',
             'DeviceAlias': 'test'
-        })
+        }).encode('UTF-8')
         mock_post.side_effect = [res, Response()]
         message = self.default_transport.create_message(logging.makeLogRecord({'mgs': 'message', 'funcName': 'foo'}))
         group_message = self.default_transport.create_group_message([message])
@@ -97,7 +97,7 @@ class AgentSocketTransportTest(TestCase):
             'AppName': 'test_appname',
             'AppEnvID': 'test',
             'DeviceAlias': 'test'
-        })
+        }).encode('UTF-8')
         mock_post.side_effect = [res, Response()]
         message = self.default_transport.create_message(logging.makeLogRecord({'mgs': 'message', 'funcName': 'foo'}))
         group_message = self.default_transport.create_group_message([message])
