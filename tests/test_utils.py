@@ -82,7 +82,12 @@ class TestInit(ClearEnvTest):
         func.assert_called()
 
         substring = "'dummy': <tests.test_utils.DummyProperty object at"
-        print(result)
+        self.assertTrue(substring in result)
+
+    def test_utils_data_to_json_dummy_request(self):
+        dummy = DummyRequest()
+        result = stackify.utils.data_to_json(dummy)
+        substring = '{"_messages": "<tests.test_utils.Dummy object at'
         self.assertTrue(substring in result)
 
 
@@ -110,6 +115,11 @@ class DummyInterable:
 class DummyProperty(object):
     def __init__(self):
         self.x = 5
+
+
+class DummyRequest(object):
+    def __init__(self):
+        self._messages = Dummy()
 
 
 if __name__ == '__main__':
