@@ -1,8 +1,7 @@
-import json
-
 from stackify.constants import RECORD_VARS
 from stackify.transport.default.formats import JSONObject
 from stackify.transport.default.error import StackifyError
+from stackify.utils import data_to_json
 
 
 class LogMsg(JSONObject):
@@ -33,7 +32,7 @@ class LogMsg(JSONObject):
                 if k not in RECORD_VARS}
 
         if data:
-            self.data = json.dumps(data, default=lambda x: hasattr(x, '__dict__') and x.__dict__ or x.__str__())
+            self.data = data_to_json(data)
 
         if record.exc_info:
             self.Ex = StackifyError()

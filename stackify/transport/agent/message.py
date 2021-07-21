@@ -1,9 +1,9 @@
-import json
 import sys
 import traceback
 
 from stackify.constants import RECORD_VARS
 from stackify.protos import stackify_agent_pb2
+from stackify.utils import data_to_json
 
 
 class BaseMessage(object):
@@ -103,7 +103,7 @@ class Log(BaseMessage):
                 if k not in RECORD_VARS}
 
         if data:
-            log.data = json.dumps(data, default=lambda x: hasattr(x, '__dict__') and x.__dict__ or x.__str__())
+            log.data = data_to_json(data)
 
         if record.exc_info:
             log.error.MergeFrom(Error(record, api_config, env_details).get_object())

@@ -110,6 +110,25 @@ class TestListener(unittest.TestCase):
         self.assertEqual(len(listener.messages), 1)
         self.assertEqual(send_log_group.call_count, 1)
 
+    @patch('stackify.transport.default.DefaultTransport.create_message')
+    @patch('stackify.transport.default.DefaultTransport.create_group_message')
+    @patch('stackify.transport.default.http.HTTPClient.send_log_group')
+    def test_create_message_crash(self, send_log_group, logmsggroup, logmsg):
+        '''The listener drops messages after retrying'''
+        listener = StackifyListener(queue_=Mock(), max_batch=3, config=self.config)
+        listener.transport._transport.identified = True
+
+        logmsg.side_effect = Exception
+
+        listener.handle(1)
+        listener.handle(2)
+        listener.handle(3)
+        self.assertEqual(len(listener.messages), 0)
+        listener.handle(4)
+        self.assertEqual(len(listener.messages), 0)  # messages not created
+        self.assertEqual(logmsg.call_count, 4)  # we called the function 4 times
+        self.assertEqual(send_log_group.call_count, 0)  # since we have exceptions
+
 
 if __name__ == '__main__':
     unittest.main()
