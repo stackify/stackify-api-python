@@ -1,7 +1,7 @@
 """
 Stackify Python API
 """
-__version__ = '1.1.2'
+__version__ = '1.1.3b1'
 
 import logging
 import inspect
