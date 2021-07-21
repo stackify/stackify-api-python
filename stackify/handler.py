@@ -76,7 +76,10 @@ class StackifyListener(QueueListener):
         self._started = False
 
     def handle(self, record):
-        self.messages.append(self.transport.create_message(record))
+        try:
+            self.messages.append(self.transport.create_message(record))
+        except Exception:
+            internal_logger.exception('Could not handle log message: {}'.format(hasattr(record, 'getMessage') and record.getMessage() or str(record)))
 
         if len(self.messages) >= self.max_batch:
             self.send_group()
