@@ -18,7 +18,7 @@ do
     fi
 
     echo "Building stackify-python-api-test-${i}..."
-    docker build --no-cache --build-arg from_version=${i} --build-arg version=${i} --file docker/stackify-python-api-test . -t stackify-python-api-test-${i}:latest
+    docker build --no-cache --build-arg from_version=${i} --build-arg version=${i} --build-arg test=${TEST} --build-arg test_repo=${TEST_REPO} --file docker/stackify-python-api-test . -t stackify-python-api-test-${i}:latest
 
     echo "Running stackify-python-api-test-${i}..."
     docker run --network="host" --name "stackify-python-api-test-${i}"  stackify-python-api-test-${i}:latest

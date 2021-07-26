@@ -9,6 +9,9 @@ from .bases import ClearEnvTest
 import stackify
 import logging
 
+from stackify.utils import ConfigError
+from stackify.utils import RegexValidator
+
 
 class TestInit(ClearEnvTest):
     '''
@@ -89,6 +92,28 @@ class TestInit(ClearEnvTest):
         result = stackify.utils.data_to_json(dummy)
         substring = '{"_messages": "<tests.test_utils.Dummy object at'
         self.assertTrue(substring in result)
+
+
+class RegexValidatorTest(ClearEnvTest):
+
+    def test_should_return_correct_value(self):
+        regex = "^[a-zA-Z0-9 _-]+$"
+        value = 'some_value'
+        _validate = RegexValidator(regex)
+
+        validated_value = _validate(value, 'SOME_KEY')
+
+        assert validated_value == value
+
+    def test_should_raise_exception(self):
+        regex = "^[a-zA-Z0-9 _-]+$"
+        value = '#$%^'
+        _validate = RegexValidator(regex)
+
+        with self.assertRaises(ConfigError) as context:
+            _validate(value, 'SOME_KEY')
+
+        assert 'does not match pattern' in context.exception.args[0]
 
 
 class Dummy(object):

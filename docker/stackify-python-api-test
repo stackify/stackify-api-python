@@ -3,6 +3,8 @@ ARG from_version
 FROM python:${from_version}
 
 ARG version
+ARG test
+ARG test_repo
 
 RUN \
     apt-get update && \
@@ -13,5 +15,6 @@ RUN mkdir /build
 COPY . /build/
 
 RUN cat /build/requirements.txt | xargs -n 1 pip install; exit 0
+RUN if [ "${test}" = 1 ]; then pip install -i "${test_repo}" stackify-python-apm; fi; exit 0
 
 CMD /bin/bash -c "cd /build && source test-docker-execute.sh"
