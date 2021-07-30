@@ -1,8 +1,8 @@
 from unittest import TestCase
 
-from stackifyapm.utils.compat import b
-from stackifyapm.utils.compat import iterkeys
-from stackifyapm.utils.compat import iteritems
+from stackify.compat import b
+from stackify.compat import iterkeys
+from stackify.compat import iteritems
 
 
 class CompatTest(TestCase):

@@ -5,15 +5,16 @@ from stackify import config
 apm_installed = False
 
 try:
+    from stackifyapm import insert_rum_script as insert_rum_script_from_apm
     apm_installed = True
-    from stackifyapm import insert_rum_script as insert_rum_script_apm
-except ImportError:
+except (ImportError):
     pass
 
 
 def insert_rum_script():
-    if apm_installed is True:
-        return insert_rum_script_apm()
+    apm_rum_script = insert_rum_script_apm()
+    if apm_rum_script:
+        return apm_rum_script
 
     rum_key = config.rum_key
     rum_script_url = config.rum_script_url
@@ -72,3 +73,14 @@ def get_transaction_id():
 
 def get_reporting_url():
     return ''
+
+
+def insert_rum_script_apm():
+    if not is_apm_installed():
+        return
+
+    return insert_rum_script_from_apm()
+
+
+def is_apm_installed():
+    return apm_installed

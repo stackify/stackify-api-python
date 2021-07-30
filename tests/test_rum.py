@@ -6,14 +6,12 @@ except Exception:
 import stackify
 import os
 import stackify.rum
-import base64
 import json
 
 from .bases import ClearEnvTest
 from stackify.transport.application import ApiConfiguration
 from stackify.utils import arg_or_env
 from stackify.constants import DEFAULT_RUM_SCRIPT_URL
-from stackifyapm.base import Client
 from unittest import TestCase
 
 APM_CONFIG = {
@@ -40,43 +38,13 @@ class RumTest(TestCase):
     def shutDown(self):
         pass
 
-    def test_default_insert_rum_script_from_apm_with_transaction(self):
-        self.update_apm_installed(True)
-        client = Client(APM_CONFIG)
-
-        transaction = client.begin_transaction("transaction_test", client=client)
-        rum_data = stackify.rum.insert_rum_script()
-        assert rum_data
-
-        rum_settings = {
-            "ID": transaction.get_trace_parent().trace_id,
-            "Name": base64.b64encode(APM_CONFIG["APPLICATION_NAME"].encode("utf-8")).decode("utf-8"),
-            "Env": base64.b64encode(APM_CONFIG["ENVIRONMENT"].encode("utf-8")).decode("utf-8"),
-            "Trans": base64.b64encode('/'.encode("utf-8")).decode("utf-8")
-        }
-
-        result_string = '<script type="text/javascript">(window.StackifySettings || (window.StackifySettings = {}))</script><script src="{}" data-key="{}" async></script>'.format(
-            json.dumps(rum_settings),
-            APM_CONFIG["RUM_SCRIPT_URL"],
-            APM_CONFIG["RUM_KEY"]
-        )
-
-        assert rum_data == result_string
-        client.end_transaction("transaction_test")
-        self.restore_apm_installed()
-
-    def test_default_insert_rum_script_from_apm_without_transaction(self):
-        self.update_apm_installed(True)
-        rum_data = stackify.rum.insert_rum_script()
-        assert not rum_data
-        self.restore_apm_installed()
-
+    @mock.patch('stackify.rum.is_apm_installed')
     @mock.patch('stackify.rum.get_reporting_url')
     @mock.patch('stackify.rum.get_transaction_id')
-    def test_default_insert_rum_script(self, func, func_reporting_url):
+    def test_default_insert_rum_script(self, func, func_reporting_url, func_apm):
         func.return_value = '123'
         func_reporting_url.return_value = 'test reporting url'
-        self.update_apm_installed(False)
+        func_apm.return_value = False
         self.update_common_config(
             rum_key='asd',
             application='app',
@@ -92,12 +60,12 @@ class RumTest(TestCase):
 
         result = stackify.rum.insert_rum_script()
         self.reset_common_config()
-        self.restore_apm_installed()
 
         assert result == '<script type="text/javascript">(window.StackifySettings || (window.StackifySettings = {}))</script><script src="https://stckjs.stackify.com/stckjs.js" data-key="asd" async></script>'.format(json.dumps(rum_settings))
 
-    def test_default_insert_rum_script_no_transaction_id(self):
-        self.update_apm_installed(False)
+    @mock.patch('stackify.rum.is_apm_installed')
+    def test_default_insert_rum_script_no_transaction_id(self, func_apm):
+        func_apm.return_value = False
         self.update_common_config(
             rum_key='asd',
             application='app',
@@ -106,12 +74,12 @@ class RumTest(TestCase):
 
         result = stackify.rum.insert_rum_script()
         self.reset_common_config()
-        self.restore_apm_installed()
 
         assert result is None
 
-    def test_default_insert_rum_script_no_key(self):
-        self.update_apm_installed(False)
+    @mock.patch('stackify.rum.is_apm_installed')
+    def test_default_insert_rum_script_no_key(self, func_apm):
+        func_apm.return_value = False
         self.update_common_config(
             rum_key='',
             application='app',
@@ -122,24 +90,24 @@ class RumTest(TestCase):
         assert not result
 
         self.reset_common_config()
-        self.restore_apm_installed()
 
-    def test_default_insert_rum_script_no_details(self):
-        self.update_apm_installed(False)
+    @mock.patch('stackify.rum.is_apm_installed')
+    def test_default_insert_rum_script_no_details(self, func_apm):
+        func_apm.return_value = False
         self.update_common_config()
 
         result = stackify.rum.insert_rum_script()
         assert not result
 
         self.reset_common_config()
-        self.restore_apm_installed()
 
+    @mock.patch('stackify.rum.is_apm_installed')
     @mock.patch('stackify.rum.get_reporting_url')
     @mock.patch('stackify.rum.get_transaction_id')
-    def test_default_insert_rum_script_from_api(self, func, func_reporting_url):
+    def test_default_insert_rum_script_from_api(self, func, func_reporting_url, func_apm):
         func.return_value = '123'
+        func_apm.return_value = False
         func_reporting_url.return_value = 'test reporting url'
-        self.update_apm_installed(False)
         self.create_config(
             rum_key='asd1',
             application='app1',
@@ -153,11 +121,11 @@ class RumTest(TestCase):
         }
         result = stackify.rum.insert_rum_script()
         self.reset_common_config()
-        self.restore_apm_installed()
         assert result == '<script type="text/javascript">(window.StackifySettings || (window.StackifySettings = {}))</script><script src="https://stckjs.stackify.com/stckjs.js" data-key="asd1" async></script>'.format(json.dumps(rum_settings))
 
-    def test_default_insert_rum_script_no_key_from_api(self):
-        self.update_apm_installed(False)
+    @mock.patch('stackify.rum.is_apm_installed')
+    def test_default_insert_rum_script_no_key_from_api(self, func_apm):
+        func_apm.return_value = False
         self.create_config(
             rum_key=None,
             application='app2',
@@ -166,12 +134,12 @@ class RumTest(TestCase):
 
         result = stackify.rum.insert_rum_script()
         self.reset_common_config()
-        self.restore_apm_installed()
 
         assert not result
 
-    def test_default_insert_rum_script_no_details_from_api(self):
-        self.update_apm_installed(False)
+    @mock.patch('stackify.rum.is_apm_installed')
+    def test_default_insert_rum_script_no_details_from_api(self, func_apm):
+        func_apm.return_value = False
         self.create_config(
             application=None,
             environment=None,
@@ -180,16 +148,8 @@ class RumTest(TestCase):
 
         result = stackify.rum.insert_rum_script()
         self.reset_common_config()
-        self.restore_apm_installed()
 
         assert not result
-
-    def update_apm_installed(self, installed):
-        self.apm_installed = stackify.rum.apm_installed
-        stackify.rum.apm_installed = installed
-
-    def restore_apm_installed(self):
-        stackify.rum.apm_installed = self.apm_installed
 
     def update_common_config(self, rum_key=None, rum_script_url=None, application=None, environment=None):
         self.config_rum_key = stackify.config.rum_key
