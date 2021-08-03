@@ -75,7 +75,8 @@ class RumTest(TestCase):
         result = stackify.rum.insert_rum_script()
         self.reset_common_config()
 
-        assert result is None
+        assert not result
+        assert result is ''
 
     @mock.patch('stackify.rum.is_apm_installed')
     def test_default_insert_rum_script_no_key(self, func_apm):
@@ -88,6 +89,7 @@ class RumTest(TestCase):
 
         result = stackify.rum.insert_rum_script()
         assert not result
+        assert result is ''
 
         self.reset_common_config()
 
@@ -98,6 +100,7 @@ class RumTest(TestCase):
 
         result = stackify.rum.insert_rum_script()
         assert not result
+        assert result is ''
 
         self.reset_common_config()
 
@@ -136,6 +139,7 @@ class RumTest(TestCase):
         self.reset_common_config()
 
         assert not result
+        assert result is ''
 
     @mock.patch('stackify.rum.is_apm_installed')
     def test_default_insert_rum_script_no_details_from_api(self, func_apm):
@@ -150,6 +154,7 @@ class RumTest(TestCase):
         self.reset_common_config()
 
         assert not result
+        assert result is ''
 
     def update_common_config(self, rum_key=None, rum_script_url=None, application=None, environment=None):
         self.config_rum_key = stackify.config.rum_key

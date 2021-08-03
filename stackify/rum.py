@@ -13,30 +13,30 @@ except (ImportError):
 
 def insert_rum_script():
     apm_rum_script = insert_rum_script_apm()
-    if apm_rum_script:
+    if apm_rum_script is not None:
         return apm_rum_script
 
     rum_key = config.rum_key
     rum_script_url = config.rum_script_url
 
     if not rum_script_url or not rum_key:
-        return None
+        return ''
 
     transaction_id = get_transaction_id()
     if not transaction_id:
-        return None
+        return ''
 
     reporting_url = get_reporting_url()
     if not reporting_url:
-        return None
+        return ''
 
     application_name = config.application
     if not application_name:
-        return None
+        return ''
 
     environment = config.environment
     if not environment:
-        return None
+        return ''
 
     settings = {
         "ID": transaction_id
@@ -58,7 +58,7 @@ def insert_rum_script():
             settings["Trans"] = reporting_url_b64
 
     if not settings:
-        return None
+        return ''
 
     return '<script type="text/javascript">(window.StackifySettings || (window.StackifySettings = {}))</script><script src="{}" data-key="{}" async></script>'.format(
         json.dumps(settings),
@@ -77,7 +77,7 @@ def get_reporting_url():
 
 def insert_rum_script_apm():
     if not is_apm_installed():
-        return
+        return None
 
     return insert_rum_script_from_apm()
 

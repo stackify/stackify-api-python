@@ -74,3 +74,4 @@ class RumTestApm(TestCase):
 
         rum_data = stackify.rum.insert_rum_script()
         assert not rum_data
+        assert rum_data is ''
