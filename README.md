@@ -123,3 +123,22 @@ logger = logging.getLogger('django')
 
 logger.warning('Something happened')
 ```
+
+
+## **Real User Monitoring (RUM)**
+
+Real user monitoring injects a script tag containing the [RUM JS](https://stackify.com/retrace-real-user-monitoring/) that is responsible for capturing information about the http requests on the browser. This approach is manual and needs to be configured.
+
+### RUM - Setup
+
+```python
+# Configuration - Standard API
+logger = stackify.getLogger(..., rum_key="YourRumKey")
+# or Configuration - Python Logging Integration
+stackify.StackifyHandler(..., rum_key="YourRumKey")
+
+# Use this to apply on views
+import stackify.rum
+
+stackify.rum.insert_rum_script()
+```
