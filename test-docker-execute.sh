@@ -14,7 +14,16 @@ function runPyTest() {
     echo '<--------------------------------------------->'
     echo "Python Version $(python --version)"
     echo 'Running pytest...'
-    py.test
+    py.test --ignore=tests/rum
+
+    if [ "${TEST}" = 1 ]; then
+        pip install -i "${TEST_REPO}" stackify-python-apm; 
+    else
+        pip install stackify-python-apm;
+        py.test tests/rum
+    fi
+
+    pip uninstall -y stackify-python-apm
 }
 
 runFlake8
