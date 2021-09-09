@@ -38,3 +38,15 @@ steps:
     script: 'srcclr scan .'
   env:
     SRCCLR_API_TOKEN: $(SRCCLR_API_TOKEN)
+
+- task: CmdLine@2
+  inputs:
+    script: 'zip -r stackify-api-python.zip stackify/ requirements.txt setup.py'
+- task: Veracode@3
+  inputs:
+    ConnectionDetailsSelection: 'Endpoint'
+    AnalysisService: 'Veracode'
+    veracodeAppProfile: 'Retrace Python Library'
+    version: 'AZ-Devops-Build-$(build.buildNumber)'
+    filepath: 'stackify-api-python.zip'
+    maximumWaitTime: '360'
