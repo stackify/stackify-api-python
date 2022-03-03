@@ -38,3 +38,6 @@ RECORD_VARS.add('log_id')
 TRANSPORT_TYPE_DEFAULT = 'default'
 TRANSPORT_TYPE_AGENT_SOCKET = 'agent_socket'
 TRANSPORT_TYPE_AGENT_HTTP = 'agent_http'
+
+DEFAULT_RUM_SCRIPT_URL = "https://stckjs.stackify.com/stckjs.js"
+DEFAULT_RUM_KEY = ""

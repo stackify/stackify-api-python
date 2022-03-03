@@ -1,6 +1,8 @@
 import os
 import json
 import logging
+import re
+from stackify import compat
 
 internal_logger = logging.getLogger(__name__)
 
@@ -61,3 +63,22 @@ def get_default_object(obj):
 
 def object_is_iterable(obj):
     return hasattr(obj, '__iter__') or isinstance(obj, str)
+
+
+class RegexValidator(object):
+    def __init__(self, regex, verbose_pattern=None):
+        self.regex = regex
+        self.verbose_pattern = verbose_pattern or regex
+
+    def __call__(self, value, field_name):
+        value = compat.text_type(value)
+        match = re.match(self.regex, value)
+        if match:
+            return value
+        raise ConfigError("{} does not match pattern {}".format(value, self.verbose_pattern), field_name)
+
+
+class ConfigError(ValueError):
+    def __init__(self, msg, field_name):
+        self.field_name = field_name
+        super(ValueError, self).__init__(msg)

@@ -3,6 +3,8 @@ ARG from_version
 FROM python:${from_version}
 
 ARG version
+ARG test
+ARG test_repo
 
 RUN \
     apt-get update && \
@@ -13,5 +15,8 @@ RUN mkdir /build
 COPY . /build/
 
 RUN cat /build/requirements.txt | xargs -n 1 pip install; exit 0
+
+ENV TEST="${test}"
+ENV TEST_REPO="${test_repo}"
 
 CMD /bin/bash -c "cd /build && source test-docker-execute.sh"
