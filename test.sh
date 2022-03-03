@@ -22,7 +22,14 @@ function runPyTest() {
     virtualenv -p python${python_version} ${test_venv}
 
     echo "Activating virtualenv ${test_venv}..."
-    source ${test_venv}/bin/activate
+
+    if [ -f ${test_venv}/bin/activate ]; then
+        source ${test_venv}/bin/activate
+    fi
+
+    if [ -f ${test_venv}/Scripts/activate ]; then
+        source ${test_venv}/Scripts/activate
+    fi
 
     echo 'Installing dependencies...'
     pip install -r requirements.txt

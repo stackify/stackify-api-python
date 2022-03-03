@@ -30,6 +30,11 @@ class TestInit(ClearEnvTest):
         for logger in self.loggers:
             del global_loggers[logger.name]
 
+    def test_utils_data_to_json_string(self):
+        dummy = 'test'
+        result = stackify.utils.data_to_json(dummy)
+        self.assertEqual('"test"', result)
+
     def test_utils_data_to_json_unserializable(self):
         dummy = Dummy()
         result = stackify.utils.data_to_json(dummy)
@@ -57,9 +62,9 @@ class TestInit(ClearEnvTest):
         self.assertEqual(expected, result)
 
     def test_utils_data_to_json_dummy_iterable(self):
-        dummy = DummyInterable()
+        dummy = DummyIterable()
         result = stackify.utils.data_to_json(dummy)
-        expected = '{"a": 21}'
+        expected = '[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]'
         self.assertEqual(expected, result)
 
     def test_utils_data_to_json_dummy_object_with_property(self):
@@ -79,10 +84,15 @@ class TestInit(ClearEnvTest):
         data['payload']['dummy'] = data
 
         result = stackify.utils.data_to_json(data)
-        func.assert_called()
 
-        substring = "'dummy': <tests.test_utils.DummyProperty object at"
+        substring = "'payload': {'dummy': "
+        data_str = str(data)
+
+        assert func.called
+        assert "Failed to serialize object to json: {}".format(data_str) in func.call_args_list[0][0][0]
+
         self.assertTrue(substring in result)
+        self.assertEqual(result, data_str)
 
     def test_utils_data_to_json_dummy_request(self):
         dummy = DummyRequest()
@@ -90,18 +100,34 @@ class TestInit(ClearEnvTest):
         substring = '{"_messages": "<tests.test_utils.Dummy object at'
         self.assertTrue(substring in result)
 
+    def test_utils_extract_request_dummy_wsgi_request(self):
+        dummy = WSGIRequestMock()
+        dummy.path = 'test'
+        dummy.POST = 'test_form'
+        dummy.not_exists = 'test'
+        data = {
+            'request': dummy
+        }
+
+        result = stackify.utils.extract_request(data)
+        request = result['request']
+
+        self.assertEqual(request['path'], 'test')
+        self.assertEqual(request['form'], 'test_form')
+        self.assertTrue('not_exists' not in request)
+
 
 class Dummy(object):
     pass
 
 
-class DummyInterable:
+class DummyIterable:
     def __iter__(self):
         self.a = 1
         return self
 
     def __next__(self):
-        if self.a <= 20:
+        if self.a <= 10:
             x = self.a
             self.a += 1
             return x
@@ -120,6 +146,11 @@ class DummyProperty(object):
 class DummyRequest(object):
     def __init__(self):
         self._messages = Dummy()
+
+
+class WSGIRequestMock:
+    def __init__(self):
+        pass
 
 
 if __name__ == '__main__':

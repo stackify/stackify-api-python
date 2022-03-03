@@ -2,6 +2,7 @@ from stackify.constants import RECORD_VARS
 from stackify.transport.default.formats import JSONObject
 from stackify.transport.default.error import StackifyError
 from stackify.utils import data_to_json
+from stackify.utils import extract_request
 
 
 class LogMsg(JSONObject):
@@ -30,6 +31,8 @@ class LogMsg(JSONObject):
         # check for user-specified keys
         data = {k: v for k, v in record.__dict__.items()
                 if k not in RECORD_VARS}
+
+        data = extract_request(data)
 
         if data:
             self.data = data_to_json(data)
