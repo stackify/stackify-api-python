@@ -23,16 +23,41 @@ def arg_or_env(name, args, default=None, env_key=None):
 
 def data_to_json(data):
     try:
-        if object_is_iterable(data) and 'request' in data and hasattr(data['request'], '_messages'):
-            data['request'] = get_default_object(data['request'])
-
         return json.dumps(data, default=lambda x: get_default_object(x))
-    except ValueError as e:
-        internal_logger.exception('Failed to serialize object to json: {} - Exception: {}'.format(data.__str__(), str(e)))
-        return json.dumps(data.__str__())  # String representation of the object
+    except Exception as e:
+        internal_logger.exception('Failed to serialize object to json: {} - Exception: {}'.format(str(data), str(e)))
+        return str(data)  # String representation of the object
+
+
+def extract_request(data):
+    if 'request' in data and "WSGIRequest" in str(data['request']):
+        new_request = {}
+        obj = data['request']
+
+        if hasattr(obj, 'path'):
+            new_request['path'] = obj.path
+
+        if hasattr(obj, 'method'):
+            new_request['method'] = obj.method
+
+        if hasattr(obj, 'POST'):
+            new_request['form'] = obj.POST
+
+        if hasattr(obj, 'GET'):
+            new_request['query'] = obj.GET
+
+        if hasattr(obj, 'content_type'):
+            new_request['content_type'] = obj.content_type
+
+        data['request'] = new_request
+
+    return data
 
 
 def get_default_object(obj):
+    if object_is_iterable(obj):
+        return [item for item in obj]
+
     return hasattr(obj, '__dict__') and obj.__dict__ or obj.__str__()
 
 
