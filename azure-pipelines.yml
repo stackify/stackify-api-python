@@ -11,7 +11,7 @@ schedules:
   displayName: Monthly build
   branches:
     include:
-    - develop
+    - master
   always: true
 
 pool:
