@@ -58,3 +58,4 @@ steps:
     version: 'AZ-Devops-Build-$(build.buildNumber)'
     filepath: 'stackify-api-python.zip'
     maximumWaitTime: '360'
+    optargs: -deleteincompletescan 2
